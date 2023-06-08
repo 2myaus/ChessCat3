@@ -1,2 +1,5 @@
-/.vscode
-/a.out
+/*
+!/main.c
+!/misc.h
+!/.gitignore
+!/.Makefile
