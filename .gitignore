@@ -2,4 +2,4 @@
 !/main.c
 !/misc.h
 !/.gitignore
-!/.Makefile
+!/Makefile
