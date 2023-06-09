@@ -33,7 +33,7 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
 
     Piece piece = GetPiece(game.position, square);
 
-    if(piece.color != game.position.to_move){
+    if(piece.color != game.position.to_move || piece.type == Empty){
         return 0;
     }
 
@@ -58,6 +58,8 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             break;
         case Bishop:
             moves_like_bishop = true;
+            break;
+        default:
             break;
     }
     
