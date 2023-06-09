@@ -24,7 +24,7 @@ Piece GetPiece(UniversalPosition position, Square square){
     return GetPieceAtPos(position, square.row, square.col);
 }
 
-void GetPossiblePieceMoves(Game game, Square square, Move *moves_buf[]){
+uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
     bool moves_like_bishop = false;
     bool moves_like_rook = false;
     bool moves_like_knight = false;
@@ -32,6 +32,8 @@ void GetPossiblePieceMoves(Game game, Square square, Move *moves_buf[]){
     bool moves_like_pawn = false;
 
     Piece piece = GetPiece(game.position, square);
+
+    uint16_t num_moves = 0;
 
     switch(piece.type){
         case Pawn:
@@ -54,8 +56,42 @@ void GetPossiblePieceMoves(Game game, Square square, Move *moves_buf[]){
             moves_like_bishop = true;
             break;
     }
+    
+    if(moves_like_king){
+        for(int8_t rowto = square.row - 1; rowto <= square.row + 1; rowto++){
+            if(rowto < 0 || rowto >= game.game_rules.board_height) {continue;}
+            for(int8_t colto = square.col - 1; colto <= square.col + 1; colto++){
 
+                if(colto < 0 || colto >= game.game_rules.board_height) {continue;}
+                if(colto == square.col && rowto == square.row) {continue;}
+                
+                Piece target_piece = GetPieceAtPos(game.position, rowto, colto);
+                if(target_piece.color == piece.color) {continue;}
 
+                Square tosquare = {.col = colto, .row = rowto};
+
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = tosquare;
+                num_moves++;
+            }
+        }
+    }
+    if(moves_like_knight){
+        //ordered in 2 square_1 square
+        Square up_left = {.col = square.col - 1, .row = square.row + 2};
+        Square up_right = {.col = square.col + 1, .row = square.row + 2};
+
+        Square right_up = {.col = square.col + 2, .row = square.row + 1};
+        Square right_down = {.col = square.col + 2, .row = square.row - 1};
+
+        Square down_right = {.col = square.col + 1, .row = square.row - 2};
+        Square down_left = {.col = square.col - 1, .row = square.row - 2};
+
+        Square left_down = {.col = square.col - 2, .row = square.row - 1};
+        Square left_up = {.col = square.col - 2, .row = square.row + 1};
+    }
+
+    return num_moves;
 }
 
 int main(){
