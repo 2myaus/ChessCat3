@@ -3,5 +3,5 @@
 #include "misc.h"
 
 int main(){
-    printf("%d\n", sizeof(Piece));
+    printf("Size: %lu\n", sizeof(Piece));
 }

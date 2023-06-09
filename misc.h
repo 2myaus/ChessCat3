@@ -1,32 +1,32 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-enum PieceType : uint8_t{
+ typedef enum /* : uint8_t*/{
     Pawn,
     King,
     Queen,
     Rook,
     Knight,
     Bishop
-} typedef PieceType;
+} PieceType;
 
-enum Color : uint8_t{
+typedef enum/* : uint8_t*/{
     White,
     Black
-} typedef Color;
+} Color;
 
-struct Piece{
+typedef struct {
     PieceType type : 5;
     Color color : 2;
     bool is_royal : 1;
-} typedef Piece;
+} Piece;
 
-struct Square{
+typedef struct{
     int8_t row;
     int8_t col;
-} typedef Square;
+} Square;
 
-struct GameRules{
+typedef struct{
     // --Game-breaking rules--
     uint8_t board_width;
     uint8_t board_height;
@@ -48,8 +48,8 @@ struct GameRules{
     bool has_duck; //🦆
     bool atomic; //💥
 
-} typedef GameRules;
+} GameRules;
 
-struct Position{
+typedef struct{
     Piece board[24][24];
-} typedef Position;
+} Position;
