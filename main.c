@@ -8,11 +8,11 @@ bool InBounds(Game game, Square square){
         && square.row < game.game_rules.board_height && square.col < game.game_rules.board_width;
 }
 
-void SetPieceAtPos(UniversalPosition position, int8_t row, int8_t col, Piece piece){
-    position.board[row][col] = piece;
+void SetPieceAtPos(UniversalPosition *position, int8_t row, int8_t col, Piece piece){
+    position->board[row][col] = piece;
 }
 
-void SetPiece(UniversalPosition position, Square square, Piece piece){
+void SetPiece(UniversalPosition *position, Square square, Piece piece){
     SetPieceAtPos(position, square.row, square.col, piece);
 }
 
@@ -32,6 +32,10 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
     bool moves_like_pawn = false;
 
     Piece piece = GetPiece(game.position, square);
+
+    if(piece.color != game.position.to_move){
+        return 0;
+    }
 
     uint16_t num_moves = 0;
 
@@ -393,7 +397,84 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
     return num_moves;
 }
 
+uint16_t GetPossibleMoves(Game game, Move moves_buf[]){
+    uint16_t move_count = 0;
+    for(uint8_t row = 0; row < game.game_rules.board_height; row++){
+        for(uint8_t col = 0; col < game.game_rules.board_width; col++){
+            Square square = {.row = row, .col = col};
+            move_count += GetPossiblePieceMoves(game, square, &(moves_buf[move_count]));
+        }
+    }
+    return move_count;
+}
+
+void SetDefaultRules(GameRules *rules){
+    rules->atomic = false;
+    rules->backwards_pawns = false;
+    rules->board_height = 8;
+    rules->board_width = 8;
+    rules->capture_all = false;
+    rules->capture_king = false;
+    rules->capture_own = false;
+    rules->check_lives = 0;
+    rules->crazyhouse_mode = false;
+    rules->giveaway_mode = false;
+    rules->has_duck = false;
+    rules->promotion_rank = 7;
+    rules->sideways_pawns = false;
+    rules->torpedo_pawns = false;
+}
+
+void SetDefaultGame(Game *game){
+    Piece wPawn = {.color = White, .is_royal = false, .type = Pawn};
+    Piece wKing = {.color = White, .is_royal = true, .type = King};
+    Piece wQueen = {.color = White, .is_royal = false, .type = Queen};
+    Piece wRook = {.color = White, .is_royal = false, .type = Rook};
+    Piece wKnight = {.color = White, .is_royal = false, .type = Knight};
+    Piece wBishop = {.color = White, .is_royal = false, .type = Bishop};
+
+    Piece bPawn = {.color = Black, .is_royal = false, .type = Pawn};
+    Piece bKing = {.color = Black, .is_royal = true, .type = King};
+    Piece bQueen = {.color = Black, .is_royal = false, .type = Queen};
+    Piece bRook = {.color = Black, .is_royal = false, .type = Rook};
+    Piece bKnight = {.color = Black, .is_royal = false, .type = Knight};
+    Piece bBishop = {.color = Black, .is_royal = false, .type = Bishop};
+    Piece empty = {.color = White, .is_royal = false, .type = Empty};
+
+    SetDefaultRules(&(game->game_rules));
+    for(uint8_t col = 0; col <= 7; col++){
+        SetPieceAtPos(&(game->position), 1, col, wPawn);
+        SetPieceAtPos(&(game->position), 6, col, bPawn);
+        SetPieceAtPos(&(game->position), 2, col, empty);
+        SetPieceAtPos(&(game->position), 3, col, empty);
+        SetPieceAtPos(&(game->position), 4, col, empty);
+        SetPieceAtPos(&(game->position), 5, col, empty);
+    }
+
+    SetPieceAtPos(&(game->position), 0, 0, wRook);
+    SetPieceAtPos(&(game->position), 0, 1, wKnight);
+    SetPieceAtPos(&(game->position), 0, 2, wBishop);
+    SetPieceAtPos(&(game->position), 0, 3, wQueen);
+    SetPieceAtPos(&(game->position), 0, 4, wKing);
+    SetPieceAtPos(&(game->position), 0, 5, wBishop);
+    SetPieceAtPos(&(game->position), 0, 6, wKnight);
+    SetPieceAtPos(&(game->position), 0, 7, wRook);
+
+    SetPieceAtPos(&(game->position), 7, 0, bRook);
+    SetPieceAtPos(&(game->position), 7, 1, bKnight);
+    SetPieceAtPos(&(game->position), 7, 2, bBishop);
+    SetPieceAtPos(&(game->position), 7, 3, bQueen);
+    SetPieceAtPos(&(game->position), 7, 4, bKing);
+    SetPieceAtPos(&(game->position), 7, 5, bBishop);
+    SetPieceAtPos(&(game->position), 7, 6, bKnight);
+    SetPieceAtPos(&(game->position), 7, 7, bRook);
+}
+
 int main(){
     printf("Piece size: %lu\n", sizeof(Piece));
     printf("Game size: %lu\n", sizeof(Game));
+    Game g;
+    SetDefaultGame(&g);
+    Move move_buf[2048];
+    printf("Moves: %d\n", GetPossibleMoves(g, move_buf));
 }
