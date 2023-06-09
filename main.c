@@ -89,7 +89,49 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
 
         Square left_down = {.col = square.col - 2, .row = square.row - 1};
         Square left_up = {.col = square.col - 2, .row = square.row + 1};
+
+        if(InBounds(game, up_left)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = up_left;
+            num_moves++;
+        }
+        if(InBounds(game, up_right)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = up_right;
+            num_moves++;
+        }
+        if(InBounds(game, right_up)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = right_up;
+            num_moves++;
+        }
+        if(InBounds(game, right_down)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = right_down;
+            num_moves++;
+        }
+        if(InBounds(game, down_right)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = down_right;
+            num_moves++;
+        }
+        if(InBounds(game, down_left)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = down_left;
+            num_moves++;
+        }
+        if(InBounds(game, left_down)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = left_down;
+            num_moves++;
+        }
+        if(InBounds(game, left_up)) {
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = left_up;
+            num_moves++;
+        }
     }
+    
 
     return num_moves;
 }
