@@ -3,5 +3,6 @@
 #include "misc.h"
 
 int main(){
-    printf("Size: %lu\n", sizeof(Piece));
+    printf("Piece size: %lu\n", sizeof(Piece));
+    printf("Game size: %lu\n", sizeof(Game));
 }

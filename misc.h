@@ -1,6 +1,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define MIN_BITS_REQUIRED(value) ((sizeof(value) * 8) - __builtin_clz(value))
+
+#define MAX_BOARD_SIZE 24 //Max board width or height
+#define NUM_COLORS 4 //Number of colors supported
+#define NUM_COLOR_BITS MIN_BITS_REQUIRED(NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)
+
  typedef enum /* : uint8_t*/{
     Pawn,
     King,
@@ -12,12 +18,14 @@
 
 typedef enum/* : uint8_t*/{
     White,
-    Black
+    Black,
+    Green,
+    Red
 } Color;
 
 typedef struct {
     PieceType type : 5;
-    Color color : 2;
+    Color color : NUM_COLOR_BITS;
     bool is_royal : 1;
 } Piece;
 
@@ -51,5 +59,13 @@ typedef struct{
 } GameRules;
 
 typedef struct{
-    Piece board[24][24];
+    Color to_move : NUM_COLOR_BITS;
+    Square passantable_square; //Should be set to -1 -1 if no square is available
+    Piece board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
+    Piece captured_pieces[MAX_BOARD_SIZE * MAX_BOARD_SIZE];
 } Position;
+
+typedef struct{
+    GameRules game_rules;
+    Position position;
+} Game;
