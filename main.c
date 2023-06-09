@@ -433,13 +433,35 @@ uint16_t GetPossibleMoves(Game game, Move moves_buf[]){
     return move_count;
 }
 
+bool ShouldIgnoreChecks(Game *game){
+    return game->game_rules.ignore_checks ||
+    game->game_rules.has_duck ||
+    game->game_rules.capture_all ||
+    game->game_rules.giveaway_mode;
+}
+
+void RawMakeMove(UniversalPosition *position, Move move){ //Sets piece positions only
+    Piece empty = {.color = White, .is_royal = false, .type = Empty};
+    position->board[move.to.row][move.to.col] = position->board[move.from.row][move.from.col];
+    position->board[move.from.row][move.from.col] = empty;
+}
+
+bool IsMoveLegal(Game *game, Move move){
+    if(ShouldIgnoreChecks(game)){
+        return true;
+    }
+    Game game_copy = *game;
+    RawMakeMove(&(game_copy.position), move);
+    //TODO: Finish this
+}
+
 void SetDefaultRules(GameRules *rules){
     rules->atomic = false;
     rules->backwards_pawns = false;
     rules->board_height = 8;
     rules->board_width = 8;
     rules->capture_all = false;
-    rules->capture_king = false;
+    rules->ignore_checks = false;
     rules->capture_own = false;
     rules->check_lives = 0;
     rules->crazyhouse_mode = false;
