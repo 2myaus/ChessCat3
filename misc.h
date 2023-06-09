@@ -18,6 +18,7 @@ G     R
 #define STORE_MAX_MOVES 128 //Max number of moves to store before rewriting earlier moves
 
  typedef enum /* : uint8_t*/{
+    Empty,
     Pawn,
     King,
     Queen,

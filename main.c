@@ -91,48 +91,305 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
         Square left_up = {.col = square.col - 2, .row = square.row + 1};
 
         if(InBounds(game, up_left)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = up_left;
-            num_moves++;
+            Piece p = GetPiece(game.position, up_left);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = up_left;
+                num_moves++;
+            }
         }
         if(InBounds(game, up_right)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = up_right;
-            num_moves++;
+            Piece p = GetPiece(game.position, up_right);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = up_right;
+                num_moves++;
+            }
         }
         if(InBounds(game, right_up)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = right_up;
-            num_moves++;
+            Piece p = GetPiece(game.position, right_up);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = right_up;
+                num_moves++;
+            }
         }
         if(InBounds(game, right_down)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = right_down;
-            num_moves++;
+            Piece p = GetPiece(game.position, right_down);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = right_down;
+                num_moves++;
+            }
         }
         if(InBounds(game, down_right)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = down_right;
-            num_moves++;
+            Piece p = GetPiece(game.position, down_right);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = down_right;
+                num_moves++;
+            }
         }
         if(InBounds(game, down_left)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = down_left;
-            num_moves++;
+            Piece p = GetPiece(game.position, down_left);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = down_left;
+                num_moves++;
+            }
         }
         if(InBounds(game, left_down)) {
-            moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = left_down;
-            num_moves++;
+            Piece p = GetPiece(game.position, left_down);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = left_down;
+                num_moves++;
+            }
         }
         if(InBounds(game, left_up)) {
+            Piece p = GetPiece(game.position, left_up);
+                if(p.type == Empty || p.color != piece.color){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = left_up;
+                num_moves++;
+            }
+        }
+    }
+    if(moves_like_bishop){
+        Square toSquare = square;
+        while (true) { //Up-Right
+            toSquare.row++;
+            toSquare.col++;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
             moves_buf[num_moves].from = square;
-            moves_buf[num_moves].to = left_up;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+
+        toSquare = square;
+        while (true) { //Up-Left
+            toSquare.row++;
+            toSquare.col--;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+
+        toSquare = square;
+        while (true) { //Down-Right
+            toSquare.row--;
+            toSquare.col++;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+
+        toSquare = square;
+        while (true) { //Down-Left
+            toSquare.row--;
+            toSquare.col--;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
             num_moves++;
         }
     }
-    
+    if(moves_like_rook){
+        Square toSquare = square;
+        while (true) { //Up
+            toSquare.row++;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
 
+        toSquare = square;
+        while (true) { //Left
+            toSquare.col--;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+
+        toSquare = square;
+        while (true) { //Down
+            toSquare.row--;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+
+        toSquare = square;
+        while (true) { //Right
+            toSquare.col++;
+            if (!InBounds(game, toSquare)) {
+                break;
+            }
+            Piece hitPiece = GetPiece(game.position, toSquare);
+            if (hitPiece.type != Empty) {
+                if (hitPiece.color != piece.color) {
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = toSquare;
+                    num_moves++;
+                }
+                break;
+            }
+            moves_buf[num_moves].from = square;
+            moves_buf[num_moves].to = toSquare;
+            num_moves++;
+        }
+    }
+    if(moves_like_pawn){
+        int8_t row_dist = 0;
+        int8_t col_dist = 0;
+        switch(piece.color){
+            case White:
+                row_dist = 1;
+                break;
+            case Black:
+                row_dist = -1;
+                break;
+            case Red:
+                col_dist = -1;
+                break;
+            case Green:
+                col_dist = 1;
+                break;
+        }
+
+        Square advance_square = {.row = square.row + row_dist, .col = square.col + col_dist};
+
+        if(InBounds(game, advance_square)){
+            Square take_left_square = {.row = square.row + row_dist - col_dist, .col = square.col + col_dist - row_dist};
+            Square take_right_square = {.row = square.row + row_dist + col_dist, .col = square.col + col_dist + row_dist};
+
+            Piece advance_piece = GetPiece(game.position, advance_square);
+
+            if(advance_piece.type == Empty){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = advance_square;
+                num_moves++;
+            }
+            if(InBounds(game, take_left_square)){
+                Piece take_left_piece = GetPiece(game.position, take_left_square);
+                if(take_left_piece.type != Empty && take_left_piece.color != piece.color){
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = take_left_square;
+                    num_moves++;
+                }
+                //TODO: Add en passant
+            }
+            if(InBounds(game, take_right_square)){
+                Piece take_right_piece = GetPiece(game.position, take_right_square);
+                if(take_right_piece.type != Empty && take_right_piece.color != piece.color){
+                    moves_buf[num_moves].from = square;
+                    moves_buf[num_moves].to = take_right_square;
+                    num_moves++;
+                }
+                //TODO: Add en passant
+            }
+            if(game.game_rules.torpedo_pawns ||
+            (piece.color == White && square.row <= 1) ||
+            (piece.color == Black && square.row >= game.game_rules.board_height - 2) ||
+            (piece.color == Green && square.col >= 1) ||
+            (piece.color == Red && square.col >= game.game_rules.board_width - 2)
+            ){
+                Square double_advance_square = {.row = square.row + row_dist * 2, .col = square.col + col_dist * 2};
+                if(InBounds(game, double_advance_square)){
+                    Piece double_advance_piece = GetPiece(game.position, double_advance_square);
+                    if(double_advance_piece.type == Empty){
+                        moves_buf[num_moves].from = square;
+                        moves_buf[num_moves].to = double_advance_square;
+                        num_moves++;
+                    }
+                }
+            }
+            //TODO: Add promotion
+        }
+    }
+    
     return num_moves;
 }
 
