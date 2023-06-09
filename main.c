@@ -3,9 +3,9 @@
 
 #include "misc.h"
 
-bool InBounds(Game game, Square square){
+bool InBounds(Game *game, Square square){
     return square.row >= 0 && square.col >= 0
-        && square.row < game.game_rules.board_height && square.col < game.game_rules.board_width;
+        && square.row < game->game_rules.board_height && square.col < game->game_rules.board_width;
 }
 
 void SetPieceAtPos(UniversalPosition *position, int8_t row, int8_t col, Piece piece){
@@ -24,16 +24,24 @@ Piece GetPiece(UniversalPosition position, Square square){
     return GetPieceAtPos(position, square.row, square.col);
 }
 
-uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
+bool ColorCanCapture(Game *game, Color color, Piece piece){
+    return (piece.type == Empty ||
+    game->game_rules.capture_own ||
+    (piece.color != color)
+    ) &&
+    piece.type != Duck;
+}
+
+uint16_t GetPossiblePieceMoves(Game *game, Square square, Move moves_buf[]){
     bool moves_like_bishop = false;
     bool moves_like_rook = false;
     bool moves_like_knight = false;
     bool moves_like_king = false;
     bool moves_like_pawn = false;
 
-    Piece piece = GetPiece(game.position, square);
+    Piece piece = GetPiece(game->position, square);
 
-    if(piece.color != game.position.to_move || piece.type == Empty){
+    if(piece.color != game->position.to_move || piece.type == Empty){
         return 0;
     }
 
@@ -65,14 +73,14 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
     
     if(moves_like_king){
         for(int8_t rowto = square.row - 1; rowto <= square.row + 1; rowto++){
-            if(rowto < 0 || rowto >= game.game_rules.board_height) {continue;}
+            if(rowto < 0 || rowto >= game->game_rules.board_height) {continue;}
             for(int8_t colto = square.col - 1; colto <= square.col + 1; colto++){
 
-                if(colto < 0 || colto >= game.game_rules.board_height) {continue;}
+                if(colto < 0 || colto >= game->game_rules.board_height) {continue;}
                 if(colto == square.col && rowto == square.row) {continue;}
                 
-                Piece target_piece = GetPieceAtPos(game.position, rowto, colto);
-                if(target_piece.color == piece.color) {continue;}
+                Piece target_piece = GetPieceAtPos(game->position, rowto, colto);
+                if(!ColorCanCapture(game, piece.color, target_piece)) {continue;}
 
                 Square tosquare = {.col = colto, .row = rowto};
 
@@ -97,64 +105,64 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
         Square left_up = {.col = square.col - 2, .row = square.row + 1};
 
         if(InBounds(game, up_left)) {
-            Piece p = GetPiece(game.position, up_left);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, up_left);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = up_left;
                 num_moves++;
             }
         }
         if(InBounds(game, up_right)) {
-            Piece p = GetPiece(game.position, up_right);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, up_right);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = up_right;
                 num_moves++;
             }
         }
         if(InBounds(game, right_up)) {
-            Piece p = GetPiece(game.position, right_up);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, right_up);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = right_up;
                 num_moves++;
             }
         }
         if(InBounds(game, right_down)) {
-            Piece p = GetPiece(game.position, right_down);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, right_down);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = right_down;
                 num_moves++;
             }
         }
         if(InBounds(game, down_right)) {
-            Piece p = GetPiece(game.position, down_right);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, down_right);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = down_right;
                 num_moves++;
             }
         }
         if(InBounds(game, down_left)) {
-            Piece p = GetPiece(game.position, down_left);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, down_left);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = down_left;
                 num_moves++;
             }
         }
         if(InBounds(game, left_down)) {
-            Piece p = GetPiece(game.position, left_down);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, left_down);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = left_down;
                 num_moves++;
             }
         }
         if(InBounds(game, left_up)) {
-            Piece p = GetPiece(game.position, left_up);
-                if(p.type == Empty || p.color != piece.color){
+            Piece p = GetPiece(game->position, left_up);
+            if(ColorCanCapture(game, piece.color, p)){
                 moves_buf[num_moves].from = square;
                 moves_buf[num_moves].to = left_up;
                 num_moves++;
@@ -169,9 +177,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -190,9 +198,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -211,9 +219,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -232,9 +240,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -253,9 +261,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -273,9 +281,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -293,9 +301,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -313,9 +321,9 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             if (!InBounds(game, toSquare)) {
                 break;
             }
-            Piece hitPiece = GetPiece(game.position, toSquare);
+            Piece hitPiece = GetPiece(game->position, toSquare);
             if (hitPiece.type != Empty) {
-                if (hitPiece.color != piece.color) {
+                if (ColorCanCapture(game, piece.color, hitPiece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = toSquare;
                     num_moves++;
@@ -351,7 +359,7 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
             Square take_left_square = {.row = square.row + row_dist - col_dist, .col = square.col + col_dist - row_dist};
             Square take_right_square = {.row = square.row + row_dist + col_dist, .col = square.col + col_dist + row_dist};
 
-            Piece advance_piece = GetPiece(game.position, advance_square);
+            Piece advance_piece = GetPiece(game->position, advance_square);
 
             if(advance_piece.type == Empty){
                 moves_buf[num_moves].from = square;
@@ -359,8 +367,8 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
                 num_moves++;
             }
             if(InBounds(game, take_left_square)){
-                Piece take_left_piece = GetPiece(game.position, take_left_square);
-                if(take_left_piece.type != Empty && take_left_piece.color != piece.color){
+                Piece take_left_piece = GetPiece(game->position, take_left_square);
+                if(take_left_piece.type != Empty && ColorCanCapture(game, piece.color, take_left_piece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = take_left_square;
                     num_moves++;
@@ -368,23 +376,23 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
                 //TODO: Add en passant
             }
             if(InBounds(game, take_right_square)){
-                Piece take_right_piece = GetPiece(game.position, take_right_square);
-                if(take_right_piece.type != Empty && take_right_piece.color != piece.color){
+                Piece take_right_piece = GetPiece(game->position, take_right_square);
+                if(take_right_piece.type != Empty && ColorCanCapture(game, piece.color, take_right_piece)){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = take_right_square;
                     num_moves++;
                 }
                 //TODO: Add en passant
             }
-            if(game.game_rules.torpedo_pawns ||
+            if(game->game_rules.torpedo_pawns ||
             (piece.color == White && square.row <= 1) ||
-            (piece.color == Black && square.row >= game.game_rules.board_height - 2) ||
+            (piece.color == Black && square.row >= game->game_rules.board_height - 2) ||
             (piece.color == Green && square.col >= 1) ||
-            (piece.color == Red && square.col >= game.game_rules.board_width - 2)
+            (piece.color == Red && square.col >= game->game_rules.board_width - 2)
             ){
                 Square double_advance_square = {.row = square.row + row_dist * 2, .col = square.col + col_dist * 2};
                 if(InBounds(game, double_advance_square)){
-                    Piece double_advance_piece = GetPiece(game.position, double_advance_square);
+                    Piece double_advance_piece = GetPiece(game->position, double_advance_square);
                     if(double_advance_piece.type == Empty){
                         moves_buf[num_moves].from = square;
                         moves_buf[num_moves].to = double_advance_square;
@@ -393,6 +401,21 @@ uint16_t GetPossiblePieceMoves(Game game, Square square, Move moves_buf[]){
                 }
             }
             //TODO: Add promotion
+        }
+        if(game->game_rules.sideways_pawns){
+            Square left_square = {.row = square.row - col_dist, .col = square.col - row_dist};
+            Square right_square = {.row = square.row + col_dist, .col = square.col + row_dist};
+
+            if(InBounds(game, left_square)){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = left_square;
+                num_moves++;
+            }
+            if(InBounds(game, right_square)){
+                moves_buf[num_moves].from = square;
+                moves_buf[num_moves].to = right_square;
+                num_moves++;
+            }
         }
     }
     
@@ -404,7 +427,7 @@ uint16_t GetPossibleMoves(Game game, Move moves_buf[]){
     for(uint8_t row = 0; row < game.game_rules.board_height; row++){
         for(uint8_t col = 0; col < game.game_rules.board_width; col++){
             Square square = {.row = row, .col = col};
-            move_count += GetPossiblePieceMoves(game, square, &(moves_buf[move_count]));
+            move_count += GetPossiblePieceMoves(&game, square, &(moves_buf[move_count]));
         }
     }
     return move_count;
@@ -478,5 +501,10 @@ int main(){
     Game g;
     SetDefaultGame(&g);
     Move move_buf[2048];
-    printf("Moves: %d\n", GetPossibleMoves(g, move_buf));
+    uint16_t num_moves = GetPossibleMoves(g, move_buf);
+    printf("Moves: %d\n", num_moves);
+    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    for(uint16_t i = 0; i < num_moves; i++){
+        printf("%c%d to %c%d\n", getCol[move_buf[i].from.col], move_buf[i].from.row + 1, getCol[move_buf[i].to.col], move_buf[i].to.row + 1);
+    }
 }

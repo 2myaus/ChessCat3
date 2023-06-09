@@ -18,13 +18,14 @@ G     R
 #define STORE_MAX_MOVES 128 //Max number of moves to store before rewriting earlier moves
 
  typedef enum /* : uint8_t*/{
-    Empty,
+    Empty, //Colorless
     Pawn,
     King,
     Queen,
     Rook,
     Knight,
-    Bishop
+    Bishop,
+    Duck //Colorless
 } PieceType;
 
 typedef enum/* : uint8_t*/{
@@ -62,7 +63,7 @@ typedef struct{
     uint8_t board_height;
 
     // --Misc rules--
-    bool capture_king; //Capture king to win instead of checkmating
+    bool capture_king; //Capture king to win instead of checkmating. Disables check.
     bool capture_own; //Able to capture your own pieces
     bool sideways_pawns; //Pawns can move sideways
     bool backwards_pawns; //Pawns can move backwards
@@ -76,7 +77,7 @@ typedef struct{
     // --Gamemodes--
     bool giveaway_mode; //Give away all pieces to win
     bool crazyhouse_mode; //Place back pieces that you've captured
-    bool has_duck; //🦆
+    bool has_duck;//🦆
     bool atomic; //💥
 
 } GameRules;
