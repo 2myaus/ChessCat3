@@ -1,3 +1,4 @@
+#include <bits/stdint-intn.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -34,6 +35,10 @@ char GetChar(Piece piece){
         return toupper(base);
     }
     return base;
+}
+
+bool SameSquare(Square s1, Square s2){
+    return s1.row == s2.row && s1.col == s2.col;
 }
 
 bool InBounds(Game *game, Square square){
@@ -623,10 +628,22 @@ uint16_t GetPossibleMoves(Game game, Move moves_buf[]){
 }
 
 bool ShouldIgnoreChecks(Game *game){
-    return game->game_rules.ignore_checks ||
+    if(game->game_rules.ignore_checks ||
     game->game_rules.has_duck ||
     game->game_rules.capture_all ||
-    game->game_rules.giveaway_mode;
+    game->game_rules.giveaway_mode){
+        return true;
+    }
+    uint8_t num_colors = 0;
+    if(game->position.color_data[White].is_in_game) { num_colors++; }
+    if(game->position.color_data[Black].is_in_game) { num_colors++; }
+    if(game->position.color_data[Red].is_in_game) { num_colors++; }
+    if(game->position.color_data[Green].is_in_game) { num_colors++; }
+
+    if(num_colors > 2){
+        return true;
+    }
+    return false;
 }
 
 void MoveSetPieces(Game *game, Move move) { // Sets piece positions only
@@ -687,14 +704,130 @@ void MoveSetPieces(Game *game, Move move) { // Sets piece positions only
     game->position.board[move.from.row][move.from.col] = empty;
 }
 
-bool IsMoveLegal(Game *game, Move move){
-    if(ShouldIgnoreChecks(game)){
-        return true;
+void SetNextToPlay(Game *game){
+    if(game->position.color_data[White].is_in_game == false &&
+    game->position.color_data[Black].is_in_game == false &&
+    game->position.color_data[Green].is_in_game == false &&
+    game->position.color_data[Red].is_in_game == false){
+        return;
     }
+    switch (game->position.to_move) {
+        case White:
+            game->position.to_move = Red;
+            break;
+        case Red:
+            game->position.to_move = Black;
+            break;
+        case Black:
+            game->position.to_move = Green;
+            break;
+        default:
+            game->position.to_move = White;
+            break;
+    }
+    while(game->position.color_data[game->position.to_move].is_in_game == false || !IsValidSquare(FindKing(game, game->position.to_move))){
+        switch (game->position.to_move) {
+            case White:
+                game->position.to_move = Red;
+                break;
+            case Red:
+                game->position.to_move = Black;
+                break;
+            case Black:
+                game->position.to_move = Green;
+                break;
+            default:
+                game->position.to_move = White;
+                break;
+        }
+    }
+}
+
+MoveCastleType GetCastleType(Game *game, Move move){
+    int8_t coldist = move.to.col - move.from.col;
+    int8_t rowdist = move.to.row - move.from.row;
+
+    Piece piece = GetPiece(game->position, move.from);
+    if(piece.type == King && piece.is_royal && (abs(rowdist) > 1 || abs(coldist > 1))){
+        if(rowdist > 0 || coldist > 0){
+            return UpperCastle;
+        }
+        if(rowdist < 0 || coldist < 0){
+            return LowerCastle;
+        }        
+    }
+    return NotCastle;
+}
+
+bool CanCaptureRoyal(Game *game){ // Whether a royal can be captured in the given position
+    //TODO: This
+}
+
+void MakeMove(Game *game, Move move){
+    Piece piece = GetPiece(game->position, move.from);
+    if(piece.type == King){
+        MoveCastleType castle_type = GetCastleType(game, move);
+        game->position.color_data[game->position.to_move].has_king_moved = true;
+        if(castle_type == UpperCastle){
+            game->position.color_data[game->position.to_move].has_upper_rook_moved = true;
+        }
+        else if(castle_type == LowerCastle){
+            game->position.color_data[game->position.to_move].has_lower_rook_moved = true;
+        }
+    }
+    else if(piece.type == Rook){
+        Square lower_rook = FindLowerRook(game, game->position.to_move);
+        Square upper_rook = FindUpperRook(game, game->position.to_move);
+        if(SameSquare(lower_rook, move.from)){
+            game->position.color_data[game->position.to_move].has_lower_rook_moved = true;
+        }
+        else if(SameSquare(upper_rook, move.from)){
+            game->position.color_data[game->position.to_move].has_upper_rook_moved = true;
+        }
+    }
+    else if(piece.type == Pawn){
+        int8_t col_dist = move.to.col - move.from.col;
+        int8_t row_dist = move.to.row - move.from.row;
+        if(col_dist > 1){
+            Square passant = {.row = move.from.row, .col = move.from.col + 1};
+            game->position.passantable_square = passant;
+        }
+        else if(col_dist < -1){
+            Square passant = {.row = move.from.row, .col = move.from.col - 1};
+            game->position.passantable_square = passant;
+        }
+        if(row_dist > 1){
+            Square passant = {.row = move.from.row + 1, .col = move.from.col};
+            game->position.passantable_square = passant;
+        }
+        else if(row_dist < -1){
+            Square passant = {.row = move.from.row - 1, .col = move.from.col};
+            game->position.passantable_square = passant;
+        }
+    }    
+    //TODO: Do Captured_Pieces here
+    //TODO: Do Num_Checks here
+    MoveSetPieces(game, move);
+    SetNextToPlay(game);
+}
+
+bool MovesIntoCheck(Game *game, Move move){
+    if(ShouldIgnoreChecks(game)){
+        return false;
+    }
+
     Game game_copy = *game;
-    MoveSetPieces(&game_copy, move);
+
     //TODO: Finish this
     //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
+}
+
+bool IsMoveLegal(Game *game, Move move){
+    if(MovesIntoCheck(game, move)){
+        return false;
+    }
+    //TODO: Finish this
+
 }
 
 void SetDefaultRules(GameRules *rules){
@@ -745,9 +878,9 @@ void SetDefaultGame(Game *game){
     }
 
     SetPieceAtPos(&(game->position), 0, 0, wRook);
-    //SetPieceAtPos(&(game->position), 0, 1, wKnight);
-    //SetPieceAtPos(&(game->position), 0, 2, wBishop);
-    //SetPieceAtPos(&(game->position), 0, 3, wQueen);
+    SetPieceAtPos(&(game->position), 0, 1, wKnight);
+    SetPieceAtPos(&(game->position), 0, 2, wBishop);
+    SetPieceAtPos(&(game->position), 0, 3, wQueen);
     SetPieceAtPos(&(game->position), 0, 4, wKing);
     SetPieceAtPos(&(game->position), 0, 5, wBishop);
     SetPieceAtPos(&(game->position), 0, 6, wKnight);
