@@ -36,9 +36,10 @@ typedef enum/* : uint8_t*/{
 } Color;
 
 typedef struct {
+    bool is_in_game;
     bool has_king_moved : 1;
-    bool has_king_rook_moved : 1;
-    bool has_queen_rook_moved : 1;
+    bool has_upper_rook_moved : 1;
+    bool has_lower_rook_moved : 1;
 } ColorData;
 
 typedef struct {
@@ -71,6 +72,8 @@ typedef struct{
     uint8_t promotion_rank;
     uint8_t check_lives; //For n+ Check modes. Set to 0 to disable
     bool capture_all; //Capture all pieces to win
+    bool allow_castle;
+    bool allow_passant;
     //TODO: Pawn promotion options
     //TODO: Royal Piece option
 
@@ -86,7 +89,6 @@ typedef struct{
     Color to_move : NUM_COLOR_BITS;
     Square passantable_square; //Should be set to -1 -1 if no square is available
     ColorData color_data[NUM_COLORS]; //Whether the king or rooks have moved
-    Square duck_position;
     uint8_t num_checks[NUM_COLORS]; //Number of times this color has been checked
     Piece board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]; //0-based array of pieces in [row][col] order
     Piece captured_pieces[MAX_BOARD_SIZE * MAX_BOARD_SIZE];
