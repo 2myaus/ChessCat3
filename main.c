@@ -53,6 +53,19 @@ bool IsValidSquare(Square square){
     return square.col > -1 && square.row > -1;
 }
 
+bool IsOnPromotionRank(UniversalPosition *position, Square square, Color color){
+    switch (color) {
+    case White:
+        return square.row == position->game_rules.board_height - 1;
+    case Black:
+        return square.row == 0;
+    case Green:
+        return square.col == position->game_rules.board_width - 1;
+    case Red:
+        return square.col == 0;
+    }
+}
+
 void SetPieceAtPos(UniversalPosition *position, int8_t row, int8_t col, Piece piece){
     position->board[row][col] = piece;
 }
@@ -866,9 +879,10 @@ bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be cap
     return false;
 }
 
-void MakeMove(UniversalPosition *position, Move move){
+void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     Piece piece = GetPiece(position, move.from);
     Square none = {.row = -1, .col = -1};
+    bool pawn_promotes = false;
     position->passant_target_square = none;
     position->passantable_square = none;
     if(piece.type == King){
@@ -914,16 +928,23 @@ void MakeMove(UniversalPosition *position, Move move){
             position->passantable_square = passant;
             position->passant_target_square = move.to;
         }
+        if(IsOnPromotionRank(position, move.to, piece.color)){
+            pawn_promotes = true;
+        }
     }    
     //TODO: Do Captured_Pieces here
     //TODO: Do Num_Checks here
     MoveSetPieces(position, move);
+    if(pawn_promotes){
+        Piece promotion = {.color = piece.color, .is_royal = false, .type = pawn_promotion};
+        SetPiece(position, move.to, promotion);
+    }
     SetNextToPlay(position);
 }
 
-void GameMakeMove(Game *game, Move move){
-    MakeMove(&(game->position), move);
-    //TODO: Move Logging
+void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
+    MakeMove(&(game->position), move, pawn_promotion);
+    //TODO: Move Logging (including pawn promotion log)
 }
 
 bool MovesIntoCheck(UniversalPosition *position, Move move){
@@ -933,7 +954,7 @@ bool MovesIntoCheck(UniversalPosition *position, Move move){
 
     UniversalPosition position_copy = *position;
 
-    MakeMove(&position_copy, move);
+    MakeMove(&position_copy, move, Pawn);
 
     return CanCaptureRoyal(&position_copy);
 }

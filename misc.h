@@ -100,6 +100,8 @@ typedef struct{
     UniversalPosition position;
     uint16_t num_moves;
     Move moves[STORE_MAX_MOVES];
+    uint16_t num_promotions;
+    PieceType promotions[MAX_BOARD_SIZE * MAX_BOARD_SIZE]; //Pawn promotions
 } Game;
 
 typedef enum{
