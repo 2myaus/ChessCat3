@@ -868,6 +868,9 @@ bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be cap
 
 void MakeMove(UniversalPosition *position, Move move){
     Piece piece = GetPiece(position, move.from);
+    Square none = {.row = -1, .col = -1};
+    position->passant_target_square = none;
+    position->passantable_square = none;
     if(piece.type == King){
         MoveCastleType castle_type = GetCastleType(position, move);
         position->color_data[position->to_move].has_king_moved = true;
