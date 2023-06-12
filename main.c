@@ -40,6 +40,10 @@ bool SameSquare(Square s1, Square s2){
     return s1.row == s2.row && s1.col == s2.col;
 }
 
+bool SameMove(Move m1, Move m2){
+    return SameSquare(m1.from, m2.from) && SameSquare(m1.to, m2.to);
+}
+
 bool InBounds(UniversalPosition *position, Square square){
     return square.row >= 0 && square.col >= 0
         && square.row < position->game_rules.board_height && square.col < position->game_rules.board_width;
@@ -722,7 +726,7 @@ bool ShouldIgnoreChecks(UniversalPosition *position){
 
 void MoveSetPieces(UniversalPosition *position, Move move) { // Sets piece positions only
     Piece empty = {.color = White, .is_royal = false, .type = Empty};
-    Piece moving = position->board[move.from.row][move.from.col];
+    Piece moving = GetPiece(position, move.from);
     
     if (moving.type == King && moving.is_royal && position->game_rules.allow_castle &&
         !position->color_data[moving.color].has_king_moved) { //Castling logic
@@ -773,9 +777,8 @@ void MoveSetPieces(UniversalPosition *position, Move move) { // Sets piece posit
             }
         }
     }
-    position->board[move.to.row][move.to.col] =
-        position->board[move.from.row][move.from.col];
-    position->board[move.from.row][move.from.col] = empty;
+    SetPiece(position, move.to, GetPiece(position, move.from));
+    SetPiece(position, move.from, empty);
 }
 
 void SetNextToPlay(UniversalPosition *position){
@@ -817,11 +820,11 @@ void SetNextToPlay(UniversalPosition *position){
     }
 }
 
-MoveCastleType GetCastleType(Game *game, Move move){
+MoveCastleType GetCastleType(UniversalPosition *position, Move move){
     int8_t coldist = move.to.col - move.from.col;
     int8_t rowdist = move.to.row - move.from.row;
 
-    Piece piece = GetPiece(&(game->position), move.from);
+    Piece piece = GetPiece(position, move.from);
     if(piece.type == King && piece.is_royal && (abs(rowdist) > 1 || abs(coldist > 1))){
         if(rowdist > 0 || coldist > 0){
             return UpperCastle;
@@ -846,26 +849,26 @@ bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be cap
     return false;
 }
 
-void MakeMove(Game *game, Move move){
-    Piece piece = GetPiece(&(game->position), move.from);
+void MakeMove(UniversalPosition *position, Move move){
+    Piece piece = GetPiece(position, move.from);
     if(piece.type == King){
-        MoveCastleType castle_type = GetCastleType(game, move);
-        game->position.color_data[game->position.to_move].has_king_moved = true;
+        MoveCastleType castle_type = GetCastleType(position, move);
+        position->color_data[position->to_move].has_king_moved = true;
         if(castle_type == UpperCastle){
-            game->position.color_data[game->position.to_move].has_upper_rook_moved = true;
+            position->color_data[position->to_move].has_upper_rook_moved = true;
         }
         else if(castle_type == LowerCastle){
-            game->position.color_data[game->position.to_move].has_lower_rook_moved = true;
+            position->color_data[position->to_move].has_lower_rook_moved = true;
         }
     }
     else if(piece.type == Rook){
-        Square lower_rook = FindLowerRook(&(game->position), game->position.to_move);
-        Square upper_rook = FindUpperRook(&(game->position), game->position.to_move);
+        Square lower_rook = FindLowerRook(position, position->to_move);
+        Square upper_rook = FindUpperRook(position, position->to_move);
         if(SameSquare(lower_rook, move.from)){
-            game->position.color_data[game->position.to_move].has_lower_rook_moved = true;
+            position->color_data[position->to_move].has_lower_rook_moved = true;
         }
         else if(SameSquare(upper_rook, move.from)){
-            game->position.color_data[game->position.to_move].has_upper_rook_moved = true;
+            position->color_data[position->to_move].has_upper_rook_moved = true;
         }
     }
     else if(piece.type == Pawn){
@@ -873,26 +876,30 @@ void MakeMove(Game *game, Move move){
         int8_t row_dist = move.to.row - move.from.row;
         if(col_dist > 1){
             Square passant = {.row = move.from.row, .col = move.from.col + 1};
-            game->position.passantable_square = passant;
+            position->passantable_square = passant;
         }
         else if(col_dist < -1){
             Square passant = {.row = move.from.row, .col = move.from.col - 1};
-            game->position.passantable_square = passant;
+            position->passantable_square = passant;
         }
         if(row_dist > 1){
             Square passant = {.row = move.from.row + 1, .col = move.from.col};
-            game->position.passantable_square = passant;
+            position->passantable_square = passant;
         }
         else if(row_dist < -1){
             Square passant = {.row = move.from.row - 1, .col = move.from.col};
-            game->position.passantable_square = passant;
+            position->passantable_square = passant;
         }
     }    
     //TODO: Do Captured_Pieces here
     //TODO: Do Num_Checks here
+    MoveSetPieces(position, move);
+    SetNextToPlay(position);
+}
+
+void GameMakeMove(Game *game, Move move){
+    MakeMove(&(game->position), move);
     //TODO: Move Logging
-    MoveSetPieces(&(game->position), move);
-    SetNextToPlay(&(game->position));
 }
 
 bool MovesIntoCheck(UniversalPosition *position, Move move){
@@ -900,16 +907,28 @@ bool MovesIntoCheck(UniversalPosition *position, Move move){
         return false;
     }
 
-    //TODO: Finish this
-    //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
+    UniversalPosition position_copy = *position;
+
+    MakeMove(&position_copy, move);
+
+    return CanCaptureRoyal(&position_copy);
 }
 
 bool IsMoveLegal(UniversalPosition *position, Move move){
     if(MovesIntoCheck(position, move)){
         return false;
     }
-    //TODO: Finish this
+    Move moves[GetPossiblePieceMoves(position, move.from, NULL)];
+    uint16_t num_moves = GetPossiblePieceMoves(position, move.from, NULL); //TODO: Replace this with something more efficient
 
+    for(uint16_t i = 0; i < num_moves; i++){
+        if(SameMove(move, moves[i])){
+            return true;
+        }
+    }
+
+    //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
+    return false;
 }
 
 void SetDefaultRules(GameRules *rules){

@@ -97,6 +97,7 @@ typedef struct{
 
 typedef struct{
     UniversalPosition position;
+    uint16_t num_moves;
     Move moves[STORE_MAX_MOVES];
 } Game;
 
