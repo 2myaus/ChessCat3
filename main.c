@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "misc.h"
 
@@ -36,6 +37,41 @@ char GetChar(Piece piece){
     return base;
 }
 
+Square GetSquareFromString(char* str){
+    Square square = {.row = -1, .col = -1};
+
+    int len = strlen(str);
+    if(len == 2){
+        int rownum = str[1] - '0';
+        if(rownum < 1 || rownum > 9){
+            return square;
+        }
+        int colnum = str[0] - 'a';
+        if(colnum < 0 || colnum > 25){
+            return square;
+        }
+
+        square.row = rownum - 1;
+        square.col = colnum;
+    }
+    else if(len == 3){
+        int colnum = str[0] - 'a';
+        if(colnum < 0 || colnum > 25){
+            return square;
+        }
+
+        int rownum = atoi(str + 1);
+        if(rownum < 1){
+            return square;
+        }
+
+        square.row = rownum - 1;
+        square.col = colnum;
+    }
+
+    return square;
+}
+
 bool SameSquare(Square s1, Square s2){
     return s1.row == s2.row && s1.col == s2.col;
 }
@@ -64,6 +100,7 @@ bool IsOnPromotionRank(UniversalPosition *position, Square square, Color color){
     case Red:
         return square.col == 0;
     }
+    return false;
 }
 
 void SetPieceAtPos(UniversalPosition *position, int8_t row, int8_t col, Piece piece){
