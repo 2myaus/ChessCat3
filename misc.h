@@ -86,6 +86,7 @@ typedef struct{
 } GameRules;
 
 typedef struct{
+    GameRules game_rules;
     Color to_move : NUM_COLOR_BITS;
     Square passantable_square; //Should be set to -1 -1 if no square is available
     ColorData color_data[NUM_COLORS]; //Whether the king or rooks have moved
@@ -95,7 +96,6 @@ typedef struct{
 } UniversalPosition;
 
 typedef struct{
-    GameRules game_rules;
     UniversalPosition position;
     Move moves[STORE_MAX_MOVES];
 } Game;
