@@ -979,6 +979,25 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     SetNextToPlay(position);
 }
 
+Move GetMoveFromString(UniversalPosition *position, char* str){
+    Square none = {.row = -1, .col = -1};
+    Move move;
+    move.to = none;
+    move.from = none;
+
+    int len = strlen(str);
+
+    if(len < 2 || len > 6) {return move;}
+
+    Square to_square = GetSquareFromString(str);
+
+    if(!InBounds(position, to_square)){
+        return move;
+    }
+
+    //TODO: Finish
+}
+
 void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
     MakeMove(&(game->position), move, pawn_promotion);
     //TODO: Move Logging (including pawn promotion log)
@@ -1131,7 +1150,7 @@ int main(){
 
     PrintPosition(&g);
 
-    if(CanCaptureRoyal(&g.position)){
-        printf("Cap\n");
+    if(IsValidSquare(GetSquareFromString(""))){
+        printf("Val\n");
     }
 }
