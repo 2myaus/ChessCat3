@@ -633,7 +633,13 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     }
                     num_moves++;
                 }
-                //TODO: Add en passant
+                if(SameSquare(take_left_square, position->passantable_square)){
+                    if(moves_buf != NULL){
+                        moves_buf[num_moves].from = square;
+                        moves_buf[num_moves].to = take_left_square;
+                    }
+                    num_moves++;
+                }
             }
             if(InBounds(position, take_right_square)){
                 Piece take_right_piece = GetPiece(position, take_right_square);
@@ -644,7 +650,13 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     }
                     num_moves++;
                 }
-                //TODO: Add en passant
+                if(SameSquare(take_right_square, position->passantable_square)){
+                    if(moves_buf != NULL){
+                        moves_buf[num_moves].from = square;
+                        moves_buf[num_moves].to = take_right_square;
+                    }
+                    num_moves++;
+                }
             }
             if(position->game_rules.torpedo_pawns ||
             (piece.color == White && square.row <= 1) ||
@@ -777,6 +789,11 @@ void MoveSetPieces(UniversalPosition *position, Move move) { // Sets piece posit
             }
         }
     }
+    if (moving.type == Pawn){
+        if(SameSquare(move.to, position->passantable_square)){
+            SetPiece(position, position->passant_target_square, empty);
+        }     
+    }
     SetPiece(position, move.to, GetPiece(position, move.from));
     SetPiece(position, move.from, empty);
 }
@@ -877,18 +894,22 @@ void MakeMove(UniversalPosition *position, Move move){
         if(col_dist > 1){
             Square passant = {.row = move.from.row, .col = move.from.col + 1};
             position->passantable_square = passant;
+            position->passant_target_square = move.to;
         }
         else if(col_dist < -1){
             Square passant = {.row = move.from.row, .col = move.from.col - 1};
             position->passantable_square = passant;
+            position->passant_target_square = move.to;
         }
         if(row_dist > 1){
             Square passant = {.row = move.from.row + 1, .col = move.from.col};
             position->passantable_square = passant;
+            position->passant_target_square = move.to;
         }
         else if(row_dist < -1){
             Square passant = {.row = move.from.row - 1, .col = move.from.col};
             position->passantable_square = passant;
+            position->passant_target_square = move.to;
         }
     }    
     //TODO: Do Captured_Pieces here

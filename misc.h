@@ -89,6 +89,7 @@ typedef struct{
     GameRules game_rules;
     Color to_move : NUM_COLOR_BITS;
     Square passantable_square; //Should be set to -1 -1 if no square is available
+    Square passant_target_square; //The pawn to be taken if en passant happens
     ColorData color_data[NUM_COLORS]; //Whether the king or rooks have moved
     uint8_t num_checks[NUM_COLORS]; //Number of times this color has been checked
     Piece board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]; //0-based array of pieces in [row][col] order
