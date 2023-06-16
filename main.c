@@ -37,6 +37,37 @@ char GetChar(Piece piece){
     return base;
 }
 
+Piece GetPieceFromChar(char c){
+    Piece making = {.type = Empty, .is_royal = false, .color = White};
+    switch (tolower(c)) {
+        case 'p':
+            making.type = Pawn;
+            break;
+        case 'k':
+            making.type = King;
+            break;
+        case 'q':
+            making.type = Queen;
+            break;
+        case 'r':
+            making.type = Rook;
+            break;
+        case 'n':
+            making.type = Knight;
+            break;
+        case 'b':
+            making.type = Bishop;
+            break;
+        default:
+            making.type = Empty;
+            break;
+    }
+    if(!isupper(c)){
+        making.color = Black;
+    }
+    return making;
+}
+
 Square GetSquareFromString(char* str){
     Square square = {.row = -1, .col = -1};
 
@@ -979,22 +1010,56 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     SetNextToPlay(position);
 }
 
-Move GetMoveFromString(UniversalPosition *position, char* str){
+
+
+MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square none = {.row = -1, .col = -1};
-    Move move;
-    move.to = none;
-    move.from = none;
+    MovePromotion move_p;
+    move_p.move.to = none;
+    move_p.move.from = none;
+    move_p.promotion = Empty;
 
     int len = strlen(str);
 
-    if(len < 2 || len > 6) {return move;}
+    if(len < 2 || len > 6) {return move_p;}
 
-    Square to_square = GetSquareFromString(str);
+    Square to_square;
 
-    if(!InBounds(position, to_square)){
-        return move;
+    if(strchr(str, '=') != NULL){
+        to_square = GetSquareFromString(str + len - 4);
+        Piece promote_to = GetPieceFromChar(*(str + len - 1));
+        if(promote_to.type != Empty){
+            move_p.promotion = promote_to.type;
+        }
+        //TODO: Add promotion piece here
+    }
+    else{
+        to_square = GetSquareFromString(str + len - 2);
     }
 
+    if(!InBounds(position, to_square)){
+        return move_p;
+    }
+
+    if(len == 2){
+        //Col-Row
+    }
+    else if(len == 3){
+        //Piece-Col-Row
+    }
+    else if(len == 4){
+        /*
+        Possibilities:
+        Col1-Row1-Col2-Row2
+        Piece-x-Col-Row
+        Col-x-Col-Row
+        Piece-Col-Col-Row
+        Piece-Row-Col-Row
+        */
+    }
+    else{
+        
+    }
     //TODO: Finish
 }
 

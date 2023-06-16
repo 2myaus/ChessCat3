@@ -59,6 +59,11 @@ typedef struct{
 } Move;
 
 typedef struct{
+    Move move;
+    PieceType promotion;
+} MovePromotion;
+
+typedef struct{
     // --Game-breaking rules--
     uint8_t board_width;
     uint8_t board_height;
