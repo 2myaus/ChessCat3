@@ -151,8 +151,8 @@ Piece GetPiece(UniversalPosition *position, Square square){
 }
 
 Square FindKing(UniversalPosition *position, Color color){
-    for(uint row = 0; row < position->game_rules.board_height; row++){
-        for(uint col = 0; col < position->game_rules.board_width; col++){
+    for(uint16_t row = 0; row < position->game_rules.board_height; row++){
+        for(uint16_t col = 0; col < position->game_rules.board_width; col++){
             Square square = {.row = row, .col = col};
             Piece piece = GetPiece(position, square);
             if(piece.type == King && piece.color == color){
@@ -219,14 +219,8 @@ Square FindUpperRook(UniversalPosition *position, Color color){
 }
 
 bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
-    return (piece.type == Empty ||
-    position->game_rules.capture_own ||
-    (piece.color != color)
-    ) &&
-    piece.type != Duck;
+    return (piece.type == Empty || piece.color != color);
 }
-
-
 
 uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move moves_buf[]){
     bool moves_like_bishop = false;
@@ -739,6 +733,7 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     num_moves++;
                 }
             }
+            /*
             if(position->game_rules.torpedo_pawns ||
             (piece.color == White && square.row <= 1) ||
             (piece.color == Black && square.row >= position->game_rules.board_height - 2) ||
@@ -757,8 +752,10 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     }
                 }
             }
+            */
             //TODO: Add promotion
         }
+        /*
         if(position->game_rules.sideways_pawns){
             Square left_square = {.row = square.row - col_dist, .col = square.col - row_dist};
             Square right_square = {.row = square.row + col_dist, .col = square.col + row_dist};
@@ -778,6 +775,7 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                 num_moves++;
             }
         }
+        */
     }
     
     return num_moves;
@@ -799,10 +797,7 @@ uint16_t GetPossibleMoves(UniversalPosition *position, Move moves_buf[]){
 }
 
 bool ShouldIgnoreChecks(UniversalPosition *position){
-    if(position->game_rules.ignore_checks ||
-    position->game_rules.has_duck ||
-    position->game_rules.capture_all ||
-    position->game_rules.giveaway_mode){
+    if(position->game_rules.ignore_checks){
         return true;
     }
     uint8_t num_colors = 0;
@@ -1019,46 +1014,30 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     move_p.move.from = none;
     move_p.promotion = Empty;
 
+    MovePromotion move_p_final; //Copy to this before returning. If there is an error in parsing, return without copying
+
     int len = strlen(str);
 
     if(len < 2 || len > 6) {return move_p;}
 
     Square to_square;
 
+    uint8_t read_pos = len;
+
     if(strchr(str, '=') != NULL){
-        to_square = GetSquareFromString(str + len - 4);
         Piece promote_to = GetPieceFromChar(*(str + len - 1));
         if(promote_to.type != Empty){
             move_p.promotion = promote_to.type;
         }
-        //TODO: Add promotion piece here
+        else{
+            return move_p_final;
+        }
+        read_pos -= 2;
     }
-    else{
-        to_square = GetSquareFromString(str + len - 2);
-    }
-
-    if(!InBounds(position, to_square)){
-        return move_p;
-    }
-
-    if(len == 2){
-        //Col-Row
-    }
-    else if(len == 3){
-        //Piece-Col-Row
-    }
-    else if(len == 4){
-        /*
-        Possibilities:
-        Col1-Row1-Col2-Row2
-        Piece-x-Col-Row
-        Col-x-Col-Row
-        Piece-Col-Col-Row
-        Piece-Row-Col-Row
-        */
-    }
-    else{
-        
+    read_pos -= 2;
+    to_square = GetSquareFromString(str + read_pos);
+    if(!IsValidSquare(to_square)){
+        return move_p_final;
     }
     //TODO: Finish
 }
@@ -1098,22 +1077,11 @@ bool IsMoveLegal(UniversalPosition *position, Move move){
 }
 
 void SetDefaultRules(GameRules *rules){
-    rules->atomic = false;
     rules->allow_castle = true;
-    rules->allow_passant = true;    
-    rules->backwards_pawns = false;
+    rules->allow_passant = true;
     rules->board_height = 8;
     rules->board_width = 8;
-    rules->capture_all = false;
     rules->ignore_checks = false;
-    rules->capture_own = false;
-    rules->check_lives = 0;
-    rules->crazyhouse_mode = false;
-    rules->giveaway_mode = false;
-    rules->has_duck = false;
-    rules->promotion_rank = 7;
-    rules->sideways_pawns = false;
-    rules->torpedo_pawns = false;
     rules->allow_castle = true;
     rules->allow_passant = true;
 }

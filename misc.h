@@ -24,8 +24,8 @@ typedef enum /* : uint8_t*/{
     Queen,
     Rook,
     Knight,
-    Bishop,
-    Duck //Colorless
+    Bishop
+    //Duck //Colorless
 } PieceType;
 
 typedef enum/* : uint8_t*/{
@@ -70,23 +70,23 @@ typedef struct{
 
     // --Misc rules--
     bool ignore_checks; //Capture king to win instead of checkmating. Disables check.
-    bool capture_own; //Able to capture your own pieces
-    bool sideways_pawns; //Pawns can move sideways
-    bool backwards_pawns; //Pawns can move backwards
-    bool torpedo_pawns; //Pawns can always move 2 spaces forwards
-    uint8_t promotion_rank;
-    uint8_t check_lives; //For n+ Check modes. Set to 0 to disable
-    bool capture_all; //Capture all pieces to win
+    //bool capture_own; //Able to capture your own pieces
+    //bool sideways_pawns; //Pawns can move sideways
+    //bool backwards_pawns; //Pawns can move backwards
+    //bool torpedo_pawns; //Pawns can always move 2 spaces forwards
+    //uint8_t promotion_rank;
+    //uint8_t check_lives; //For n+ Check modes. Set to 0 to disable
+    //bool capture_all; //Capture all pieces to win
     bool allow_castle;
     bool allow_passant;
     //TODO: Pawn promotion options
     //TODO: Royal Piece option
 
     // --Gamemodes--
-    bool giveaway_mode; //Give away all pieces to win
-    bool crazyhouse_mode; //Place back pieces that you've captured
-    bool has_duck; //🦆
-    bool atomic; //💥
+    //bool giveaway_mode; //Give away all pieces to win
+    //bool crazyhouse_mode; //Place back pieces that you've captured
+    //bool has_duck; //🦆
+    //bool atomic; //💥
 
 } GameRules;
 
