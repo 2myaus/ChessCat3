@@ -3,7 +3,7 @@
 
 #define MIN_BITS_REQUIRED(value) ((sizeof(value) * 8) - __builtin_clz(value))
 
-#define MAX_BOARD_SIZE 24 //Max board width or height
+#define MAX_BOARD_SIZE 23 //Max board width or height
 
 #define NUM_COLORS 4 //Number of colors supported
 #define NUM_COLOR_BITS MIN_BITS_REQUIRED(NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)

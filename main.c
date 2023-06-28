@@ -1005,8 +1005,6 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     SetNextToPlay(position);
 }
 
-
-
 MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square none = {.row = -1, .col = -1};
     MovePromotion move_p;
@@ -1023,7 +1021,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square to_square;
 
     uint8_t read_pos = len;
-
+    //TODO: Fix this function to allow 2-digit row numbering
     if(strchr(str, '=') != NULL){
         Piece promote_to = GetPieceFromChar(*(str + len - 1));
         if(promote_to.type != Empty){
@@ -1035,10 +1033,43 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         read_pos -= 2;
     }
     read_pos -= 2;
+    if(read_pos < 0){
+        return move_p_final;
+    }
     to_square = GetSquareFromString(str + read_pos);
     if(!IsValidSquare(to_square)){
         return move_p_final;
     }
+    if(read_pos == 0){
+        //TODO: Iterate through possible moves, only one should result in this destination square.
+        //NOTE: If move_p.promotion is assigned, it must be a pawn move
+        return move_p_final;
+    }
+    if(str[read_pos] == 'x'){
+        read_pos--;
+    }
+    if(read_pos == 0){
+        return move_p_final;
+    }
+    read_pos--;
+    if(read_pos == 0){
+        if('a' - str[0] > 25 || 'a' - str[0] < 0){
+            //Not an alphabet character
+            return move_p_final;
+        }
+        //TODO: Iterate through possible moves, this char (first in string) could be a column OR piece.
+        //If it's ambiguous, reject the move
+        return move_p_final;
+    }
+    read_pos--;
+    if(read_pos == 0){
+        //TODO: Iterate through possible moves, first 2 chars in string could be a square OR piece-col OR piece-row.
+        //If it's ambiguous or invalid, reject the move
+        return move_p_final;
+    }
+    read_pos--;
+    if(read_pos ==)
+    
     //TODO: Finish
 }
 
