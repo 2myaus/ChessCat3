@@ -223,7 +223,6 @@ bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
 }
 
 void AddMoveToBuffer(Move move, Move *moves_buf[], uint16_t *num_moves){
-    printf("%d\n", *num_moves);
     if(*moves_buf != NULL){
         (*moves_buf)[*num_moves] = move;
     }
@@ -1083,13 +1082,45 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     }
     read_pos--;
     if(read_pos == 0){
-        if('a' - str[0] > 25 || 'a' - str[0] < 0){
+        char lowered = tolower(str[0]);
+        if(lowered - 'a' > 25 || lowered - 'a' < 0){
             //Not an alphabet character
             return move_p_final;
         }
 
         //TODO: Iterate through possible moves, this char (first in string) could be a column OR piece.
         //If it's ambiguous, reject the move
+        int16_t colhint = -1;
+        PieceType piecehint = Empty;
+
+        if(lowered == str[0]){ //If it's not upper case
+            colhint = 'a' - lowered;
+        }
+        piecehint = GetPieceFromChar(lowered).type;
+
+        if(piecehint == Empty && colhint == -1){
+            return move_p_final;
+        }
+
+        Move moves[GetPossibleMoves(position, NULL)];
+        uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Make this more efficient
+
+        for(uint16_t i = 0; i < num_moves; i++){
+            Move current = moves[i];
+            if(MovesIntoCheck(position, current)){ continue; }
+            Piece moving_piece = GetPiece(position, current.from);
+            if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
+            if(SameSquare(current.to, to_square) && (moving_piece.type == piecehint || (current.from.col == colhint && moving_piece.type == Pawn))){
+                if(IsValidSquare(move_p.move.from)){
+                    //Multiple moves can move to the same square
+                    return move_p_final;
+                }
+                move_p.move = current;
+            }
+        }
+
+        move_p_final = move_p;
+
         return move_p_final;
     }
     read_pos--;
@@ -1194,6 +1225,9 @@ void PrintPosition(Game *game){
 }
 
 void PrintMove(Move m){
+    if(!IsValidSquare(m.from) || !IsValidSquare(m.to)){
+        return;
+    }
     char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
 }
@@ -1224,7 +1258,7 @@ int main(){
 
     PrintPosition(&g);
 
-    if(IsValidSquare(GetSquareFromString(""))){
-        printf("Val\n");
-    }
+    MovePromotion test = GetMoveFromString(&(g.position), "Nf3");
+
+    PrintMove(test.move);
 }
