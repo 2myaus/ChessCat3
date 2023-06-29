@@ -1016,7 +1016,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
     int len = strlen(str);
 
-    if(len < 2 || len > 6) {return move_p;}
+    if(len < 2 || len > 9) {return move_p;}
 
     Square to_square;
 
@@ -1036,7 +1036,19 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     if(read_pos < 0){
         return move_p_final;
     }
-    to_square = GetSquareFromString(str + read_pos);
+    char square_copy_buf[4];
+    strncpy(square_copy_buf, str + read_pos, 2);
+    square_copy_buf[2] = '\0';
+    to_square = GetSquareFromString(square_copy_buf); //TODO: This must be copied to its own buffer with a null terminator
+    if(!IsValidSquare(to_square)){
+        read_pos--;
+        if(read_pos < 0){
+            return move_p_final;
+        }
+        strncpy(square_copy_buf, str + read_pos, 3);
+        square_copy_buf[3] = '\0';
+        to_square = GetSquareFromString(square_copy_buf);
+    }
     if(!IsValidSquare(to_square)){
         return move_p_final;
     }
@@ -1068,7 +1080,16 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         return move_p_final;
     }
     read_pos--;
-    if(read_pos ==)
+    if(read_pos == 0){
+        //First part could be piece-row-col or row-2col (2col is 2-digit column num)
+        //TODO: Iterate moves here
+        return move_p_final;
+    }
+    read_pos--;
+    if(read_pos == 0){
+        //Should always equal 0 - 9-len strings would have to be pawn promotions which wouldn't get this far.
+        //The first part here should always be piece-row-2col
+    }
     
     //TODO: Finish
 }
