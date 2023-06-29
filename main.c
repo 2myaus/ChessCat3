@@ -222,6 +222,14 @@ bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
     return (piece.type == Empty || piece.color != color);
 }
 
+void AddMoveToBuffer(Move move, Move *moves_buf[], uint16_t *num_moves){
+    printf("%d\n", *num_moves);
+    if(*moves_buf != NULL){
+        (*moves_buf)[*num_moves] = move;
+    }
+    (*num_moves)++;
+}
+
 uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move moves_buf[]){
     bool moves_like_bishop = false;
     bool moves_like_rook = false;
@@ -273,11 +281,8 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                 if(!ColorCanCapture(position, piece.color, target_piece)) {continue;}
 
                 Square tosquare = {.col = colto, .row = rowto};
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = tosquare;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = tosquare};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(position->game_rules.allow_castle && piece.type == King && piece.is_royal && !position->color_data[piece.color].has_king_moved){
@@ -296,13 +301,9 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                             }
                         }
                         if(!is_blocked){
-                            Square tosquare = {.col = square.col - 2, .row = square.row};
-
-                            if(moves_buf != NULL){
-                                moves_buf[num_moves].from = square;
-                                moves_buf[num_moves].to = tosquare;
-                            }
-                            num_moves++;     
+                            Square tosquare = {.col = square.col - 2, .row = square.row}; 
+                            Move move = {.from = square, .to = tosquare};
+                            AddMoveToBuffer(move, &moves_buf, &num_moves);
                         }                   
                     }
                     else{
@@ -317,11 +318,8 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                         if(!is_blocked){
                             Square tosquare = {.col = square.col, .row = square.row - 2};
 
-                            if(moves_buf != NULL){
-                                moves_buf[num_moves].from = square;
-                                moves_buf[num_moves].to = tosquare;
-                            }
-                            num_moves++;    
+                            Move move = {.from = square, .to = tosquare};
+                            AddMoveToBuffer(move, &moves_buf, &num_moves);
                         }
                     }
                 }
@@ -343,11 +341,8 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                         if(!is_blocked){
                             Square tosquare = {.col = square.col - 2, .row = square.row};
 
-                            if(moves_buf != NULL){
-                                moves_buf[num_moves].from = square;
-                                moves_buf[num_moves].to = tosquare;
-                            }
-                            num_moves++;     
+                            Move move = {.from = square, .to = tosquare};
+                            AddMoveToBuffer(move, &moves_buf, &num_moves);   
                         }                   
                     }
                     else{
@@ -362,11 +357,8 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                         if(!is_blocked){
                             Square tosquare = {.col = square.col, .row = square.row - 2};
 
-                            if(moves_buf != NULL){
-                                moves_buf[num_moves].from = square;
-                                moves_buf[num_moves].to = tosquare;
-                            }
-                            num_moves++;    
+                            Move move = {.from = square, .to = tosquare};
+                            AddMoveToBuffer(move, &moves_buf, &num_moves);
                         }
                     }
                 }
@@ -390,81 +382,57 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
         if(InBounds(position, up_left)) {
             Piece p = GetPiece(position, up_left);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = up_left;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = up_left};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, up_right)) {
             Piece p = GetPiece(position, up_right);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = up_right;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = up_right};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, right_up)) {
             Piece p = GetPiece(position, right_up);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = right_up;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = right_up};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, right_down)) {
             Piece p = GetPiece(position, right_down);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = right_down;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = right_down};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, down_right)) {
             Piece p = GetPiece(position, down_right);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = down_right;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = down_right};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, down_left)) {
             Piece p = GetPiece(position, down_left);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = down_left;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = down_left};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, left_down)) {
             Piece p = GetPiece(position, left_down);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = left_down;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = left_down};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
         if(InBounds(position, left_up)) {
             Piece p = GetPiece(position, left_up);
             if(ColorCanCapture(position, piece.color, p)){
-                if(moves_buf != NULL){
-                    moves_buf[num_moves].from = square;
-                    moves_buf[num_moves].to = left_up;
-                }
-                num_moves++;
+                Move move = {.from = square, .to = left_up};
+                AddMoveToBuffer(move, &moves_buf, &num_moves);
             }
         }
     }
@@ -733,8 +701,8 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     num_moves++;
                 }
             }
-            /*
-            if(position->game_rules.torpedo_pawns ||
+            
+            if(/*position->game_rules.torpedo_pawns ||*/
             (piece.color == White && square.row <= 1) ||
             (piece.color == Black && square.row >= position->game_rules.board_height - 2) ||
             (piece.color == Green && square.col >= 1) ||
@@ -752,7 +720,7 @@ uint16_t GetPossiblePieceMoves(UniversalPosition *position, Square square, Move 
                     }
                 }
             }
-            */
+            
             //TODO: Add promotion
         }
         /*
@@ -1005,6 +973,40 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     SetNextToPlay(position);
 }
 
+void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
+    MakeMove(&(game->position), move, pawn_promotion);
+    //TODO: Move Logging (including pawn promotion log)
+}
+
+bool MovesIntoCheck(UniversalPosition *position, Move move){
+    if(ShouldIgnoreChecks(position)){
+        return false;
+    }
+
+    UniversalPosition position_copy = *position;
+
+    MakeMove(&position_copy, move, Pawn);
+
+    return CanCaptureRoyal(&position_copy);
+}
+
+bool IsMoveLegal(UniversalPosition *position, Move move){ //Expensive to use, better to use MovesIntoCheck
+    if(MovesIntoCheck(position, move)){
+        return false;
+    }
+    Move moves[GetPossiblePieceMoves(position, move.from, NULL)];
+    uint16_t num_moves = GetPossiblePieceMoves(position, move.from, NULL); //TODO: Replace this with something more efficient
+
+    for(uint16_t i = 0; i < num_moves; i++){
+        if(SameMove(move, moves[i])){
+            return true;
+        }
+    }
+
+    //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
+    return false;
+}
+
 MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square none = {.row = -1, .col = -1};
     MovePromotion move_p;
@@ -1012,16 +1014,15 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     move_p.move.from = none;
     move_p.promotion = Empty;
 
-    MovePromotion move_p_final; //Copy to this before returning. If there is an error in parsing, return without copying
+    MovePromotion move_p_final = move_p; //Copy to this before returning. If there is an error in parsing, return without copying
 
     int len = strlen(str);
 
-    if(len < 2 || len > 9) {return move_p;}
+    if(len < 2 || len > 9) {return move_p_final;}
 
     Square to_square;
 
-    uint8_t read_pos = len;
-    //TODO: Fix this function to allow 2-digit row numbering
+    int16_t read_pos = len;
     if(strchr(str, '=') != NULL){
         Piece promote_to = GetPieceFromChar(*(str + len - 1));
         if(promote_to.type != Empty){
@@ -1039,7 +1040,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     char square_copy_buf[4];
     strncpy(square_copy_buf, str + read_pos, 2);
     square_copy_buf[2] = '\0';
-    to_square = GetSquareFromString(square_copy_buf); //TODO: This must be copied to its own buffer with a null terminator
+    to_square = GetSquareFromString(square_copy_buf);
     if(!IsValidSquare(to_square)){
         read_pos--;
         if(read_pos < 0){
@@ -1053,15 +1054,32 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         return move_p_final;
     }
     if(read_pos == 0){
-        //TODO: Iterate through possible moves, only one should result in this destination square.
-        //NOTE: If move_p.promotion is assigned, it must be a pawn move
+        //Iterate through possible moves, only one should result in this destination square.
+        Move moves[GetPossibleMoves(position, NULL)];
+        uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Make this more efficient
+
+        for(uint16_t i = 0; i < num_moves; i++){
+            Move current = moves[i];
+            if(MovesIntoCheck(position, current)){ continue; }
+            if(move_p.promotion != Empty && GetPiece(position, current.from).type != Pawn){ continue; }
+            if(SameSquare(current.to, to_square)){
+                if(IsValidSquare(move_p.move.from)){
+                    //Multiple moves can move to the same square
+                    return move_p_final;
+                }
+                move_p.move = current;
+            }
+        }
+
+        move_p_final = move_p;
+
         return move_p_final;
     }
     if(str[read_pos] == 'x'){
         read_pos--;
-    }
-    if(read_pos == 0){
-        return move_p_final;
+        if(read_pos == 0){
+            return move_p_final;
+        }
     }
     read_pos--;
     if(read_pos == 0){
@@ -1069,6 +1087,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             //Not an alphabet character
             return move_p_final;
         }
+
         //TODO: Iterate through possible moves, this char (first in string) could be a column OR piece.
         //If it's ambiguous, reject the move
         return move_p_final;
@@ -1087,45 +1106,11 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     }
     read_pos--;
     if(read_pos == 0){
-        //Should always equal 0 - 9-len strings would have to be pawn promotions which wouldn't get this far.
+        //Should always equal 0 because 9-len strings would have to be pawn promotions which wouldn't get this far.
         //The first part here should always be piece-row-2col
     }
-    
-    //TODO: Finish
-}
-
-void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
-    MakeMove(&(game->position), move, pawn_promotion);
-    //TODO: Move Logging (including pawn promotion log)
-}
-
-bool MovesIntoCheck(UniversalPosition *position, Move move){
-    if(ShouldIgnoreChecks(position)){
-        return false;
-    }
-
-    UniversalPosition position_copy = *position;
-
-    MakeMove(&position_copy, move, Pawn);
-
-    return CanCaptureRoyal(&position_copy);
-}
-
-bool IsMoveLegal(UniversalPosition *position, Move move){
-    if(MovesIntoCheck(position, move)){
-        return false;
-    }
-    Move moves[GetPossiblePieceMoves(position, move.from, NULL)];
-    uint16_t num_moves = GetPossiblePieceMoves(position, move.from, NULL); //TODO: Replace this with something more efficient
-
-    for(uint16_t i = 0; i < num_moves; i++){
-        if(SameMove(move, moves[i])){
-            return true;
-        }
-    }
-
-    //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
-    return false;
+    //TODO: Validate that pawn moves to the promotion rank can't be made without a promotion
+    return move_p_final;
 }
 
 void SetDefaultRules(GameRules *rules){
@@ -1208,6 +1193,11 @@ void PrintPosition(Game *game){
     }
 }
 
+void PrintMove(Move m){
+    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
+}
+
 int main(){
     printf("Piece size: %lu\n", sizeof(Piece));
     printf("Game size: %lu\n", sizeof(Game));
@@ -1219,9 +1209,8 @@ int main(){
     Move move_buf[2048];
     uint16_t num_moves = GetPossibleMoves(&g.position, move_buf);
     printf("Moves: %d\n", num_moves);
-    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     for(uint16_t i = 0; i < num_moves; i++){
-        printf("%c%d to %c%d\n", getCol[move_buf[i].from.col], move_buf[i].from.row + 1, getCol[move_buf[i].to.col], move_buf[i].to.row + 1);
+        PrintMove(move_buf[i]);
     }
     Move castle_move;
     castle_move.from.row = 0;
