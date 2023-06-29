@@ -1088,7 +1088,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             return move_p_final;
         }
 
-        //TODO: Iterate through possible moves, this char (first in string) could be a column OR piece.
+        //Iterate through possible moves, this char (first in string) could be a column OR piece.
         //If it's ambiguous, reject the move
         int16_t colhint = -1;
         PieceType piecehint = Empty;
@@ -1131,14 +1131,14 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     }
     read_pos--;
     if(read_pos == 0){
-        //First part could be piece-row-col or row-2col (2col is 2-digit column num)
+        //First part could be piece-col-row or col-2row (2row is 2-digit row num)
         //TODO: Iterate moves here
         return move_p_final;
     }
     read_pos--;
     if(read_pos == 0){
         //Should always equal 0 because 9-len strings would have to be pawn promotions which wouldn't get this far.
-        //The first part here should always be piece-row-2col
+        //The first part here should always be piece-col-2row
     }
     //TODO: Validate that pawn moves to the promotion rank can't be made without a promotion
     return move_p_final;
