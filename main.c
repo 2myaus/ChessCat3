@@ -232,15 +232,23 @@ void PrintMove(Move m){
 }
 
 void PrintPosition(Game *game){
+    bool white = false;
     for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
         for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
             Square checking = {.row = row, .col = col};
+            if(white){
+                printf("\e[30m\e[107m");
+            }
+            else{
+                printf("\e[0m\e[40m");
+            }
             printf("%c", GetChar(GetPiece(&(game->position), checking)));
+            white = !white;
         }
-        printf("\n");
+        printf("\e[0m\e[40m\n");
+        white = !white;
     }
 }
-
 
 bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
     return (piece.type == Empty || piece.color != color);
