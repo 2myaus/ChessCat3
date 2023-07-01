@@ -232,7 +232,7 @@ void PrintMove(Move m){
 }
 
 void PrintPosition(Game *game){
-    bool white = false;
+    bool white = true;
     for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
         for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
             Square checking = {.row = row, .col = col};
@@ -245,7 +245,7 @@ void PrintPosition(Game *game){
             printf("%c", GetChar(GetPiece(&(game->position), checking)));
             white = !white;
         }
-        printf("\e[0m\e[40m\n");
+        printf("\e[0m\e[40m\n");//TODO: Replace this with something to actually reset to default
         white = !white;
     }
 }
@@ -1055,6 +1055,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
     int16_t read_pos = len;
     if(strchr(str, '=') != NULL){
+        //If the string contains an =, set the promotion piece type
         Piece promote_to = GetPieceFromChar(*(str + len - 1));
         if(promote_to.type != Empty){
             move_p.promotion = promote_to.type;
@@ -1106,9 +1107,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             }
         }
 
-        move_p_final = move_p;
-
-        return move_p_final;
+        goto pawn_validate;
     }
     read_pos--;
     if(str[read_pos] == 'x'){
@@ -1157,9 +1156,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             }
         }
 
-        move_p_final = move_p;
-
-        return move_p_final;
+        goto pawn_validate;
     }
     read_pos--;
     if(read_pos == 0){
@@ -1178,7 +1175,15 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         //Should always equal 0 because 9-len strings would have to be pawn promotions which wouldn't get this far.
         //The first part here should always be piece-col-2row
     }
-    //TODO: Validate that pawn moves to the promotion rank can't be made without a promotion
+    
+    pawn_validate:
+    if(move_p.promotion != Empty && (GetPiece(position, move_p.move.from).type != Pawn || !IsOnPromotionRank(position, move_p.move.to, position->to_move))){
+        return move_p_final;
+    }
+    if(GetPiece(position, move_p.move.from).type == Pawn && IsOnPromotionRank(position, move_p.move.to, position->to_move) && move_p.promotion == Empty){
+        return move_p_final;
+    }
+    move_p_final = move_p;
     return move_p_final;
 }
 
