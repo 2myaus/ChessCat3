@@ -120,6 +120,10 @@ bool IsValidSquare(Square square){
     return square.col > -1 && square.row > -1;
 }
 
+bool IsValidMove(Move m){
+    return IsValidSquare(m.from) && IsValidSquare(m.to);
+}
+
 bool IsOnPromotionRank(UniversalPosition *position, Square square, Color color){
     switch (color) {
     case White:
@@ -217,6 +221,26 @@ Square FindUpperRook(UniversalPosition *position, Color color){
     }
     return none;
 }
+
+
+void PrintMove(Move m){
+    if(!IsValidSquare(m.from) || !IsValidSquare(m.to)){
+        return;
+    }
+    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
+}
+
+void PrintPosition(Game *game){
+    for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
+        for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
+            Square checking = {.row = row, .col = col};
+            printf("%c", GetChar(GetPiece(&(game->position), checking)));
+        }
+        printf("\n");
+    }
+}
+
 
 bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
     return (piece.type == Empty || piece.color != color);
@@ -1052,17 +1076,21 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     if(!IsValidSquare(to_square)){
         return move_p_final;
     }
+    len_2:
     if(read_pos == 0){
-        //Iterate through possible moves, only one should result in this destination square.
+        //Iterate through possible moves, only one should result in this destination square and be a pawn move.
         Move moves[GetPossibleMoves(position, NULL)];
         uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Make this more efficient
 
         for(uint16_t i = 0; i < num_moves; i++){
             Move current = moves[i];
             if(MovesIntoCheck(position, current)){ continue; }
-            if(move_p.promotion != Empty && GetPiece(position, current.from).type != Pawn){ continue; }
+            if(GetPiece(position, current.from).type != Pawn){ continue; }
             if(SameSquare(current.to, to_square)){
                 if(IsValidSquare(move_p.move.from)){
+                    printf("Multiple:\n");
+                    PrintMove(move_p.move);
+                    PrintMove(current);
                     //Multiple moves can move to the same square
                     return move_p_final;
                 }
@@ -1074,13 +1102,15 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
         return move_p_final;
     }
-    if(str[read_pos] == 'x'){
-        read_pos--;
-        if(read_pos == 0){
-            return move_p_final;
-        }
-    }
     read_pos--;
+    if(str[read_pos] == 'x'){
+        printf("x\n");
+        if(read_pos == 0){
+            printf("goto\n");
+            goto len_2;
+        }
+        read_pos--;
+    }
     if(read_pos == 0){
         char lowered = tolower(str[0]);
         if(lowered - 'a' > 25 || lowered - 'a' < 0){
@@ -1094,7 +1124,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         PieceType piecehint = Empty;
 
         if(lowered == str[0]){ //If it's not upper case
-            colhint = 'a' - lowered;
+            colhint = lowered - 'a';
         }
         piecehint = GetPieceFromChar(lowered).type;
 
@@ -1214,25 +1244,7 @@ void SetDefaultGame(Game *game){
     game->position.color_data[Black].has_upper_rook_moved = false;
 }
 
-void PrintPosition(Game *game){
-    for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
-        for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
-            Square checking = {.row = row, .col = col};
-            printf("%c", GetChar(GetPiece(&(game->position), checking)));
-        }
-        printf("\n");
-    }
-}
-
-void PrintMove(Move m){
-    if(!IsValidSquare(m.from) || !IsValidSquare(m.to)){
-        return;
-    }
-    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
-}
-
-int main(){
+int main(int argc, char* argv[]){
     printf("Piece size: %lu\n", sizeof(Piece));
     printf("Game size: %lu\n", sizeof(Game));
     printf("Square size: %lu\n", sizeof(Square));
@@ -1246,19 +1258,16 @@ int main(){
     for(uint16_t i = 0; i < num_moves; i++){
         PrintMove(move_buf[i]);
     }
-    Move castle_move;
-    castle_move.from.row = 0;
-    castle_move.to.row = 0;
-
-    castle_move.from.col = 4;
-    castle_move.to.col = 2;
-
-    //MoveSetPieces(&g, castle_move);
-    //MakeMove(&g, castle_move);
 
     PrintPosition(&g);
 
-    MovePromotion test = GetMoveFromString(&(g.position), "Nf3");
-
-    PrintMove(test.move);
+    while(true){
+        char movestrbuf[16];
+        fgets(movestrbuf, 9, stdin);
+        MovePromotion next = GetMoveFromString(&g.position, movestrbuf);
+        if(IsValidMove(next.move)){
+            MakeMove(&g.position, next.move, next.promotion);
+            PrintPosition(&g);
+        }
+    }
 }
