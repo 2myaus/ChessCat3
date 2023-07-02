@@ -1037,22 +1037,6 @@ bool IsMoveLegal(UniversalPosition *position, Move move, PieceType promotion){ /
     return true;
 }
 
-bool IsMoveLegalAndPossible(UniversalPosition *position, Move move){ //Expensive to use, better to use MovesIntoCheck
-    if(MovesIntoCheck(position, move)){
-        return false;
-    }
-    Move moves[GetPossiblePieceMoves(position, move.from, NULL)];
-    uint16_t num_moves = GetPossiblePieceMoves(position, move.from, NULL); //TODO: Replace this with something more efficient
-
-    for(uint16_t i = 0; i < num_moves; i++){
-        if(SameMove(move, moves[i])){
-            return true;
-        }
-    }
-
-    //TODO: REMEMBER TO CHECK IF CASTLE IS LEGAL (MAY BE CUT OFF BY CHECK)
-    return false;
-}
 
 MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square none = {.row = -1, .col = -1};
