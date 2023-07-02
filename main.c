@@ -237,10 +237,10 @@ void PrintPosition(Game *game){
         for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
             Square checking = {.row = row, .col = col};
             if(white){
-                printf("\e[30;107m");
+                printf("\e[1;30;107m");
             }
             else{
-                printf("\e[0;40m");
+                printf("\e[1;97;40m");
             }
             printf("%c", GetChar(GetPiece(&(game->position), checking)));
             white = !white;
@@ -867,7 +867,7 @@ void MoveSetPieces(UniversalPosition *position, Move move) { // Sets piece posit
     if (moving.type == Pawn){
         if(SameSquare(move.to, position->passantable_square)){
             SetPiece(position, position->passant_target_square, empty);
-        }     
+        }
     }
     SetPiece(position, move.to, GetPiece(position, move.from));
     SetPiece(position, move.from, empty);
@@ -944,6 +944,7 @@ bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be cap
 void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     Piece piece = GetPiece(position, move.from);
     Square none = {.row = -1, .col = -1};
+    MoveSetPieces(position, move);
     bool pawn_promotes = false;
     position->passant_target_square = none;
     position->passantable_square = none;
@@ -996,7 +997,6 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     }    
     //TODO: Do Captured_Pieces here
     //TODO: Do Num_Checks here
-    MoveSetPieces(position, move);
     if(pawn_promotes){
         Piece promotion = {.color = piece.color, .is_royal = false, .type = pawn_promotion};
         SetPiece(position, move.to, promotion);
@@ -1097,7 +1097,6 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             if(GetPiece(position, current.from).type != Pawn){ continue; }
             if(SameSquare(current.to, to_square)){
                 if(IsValidSquare(move_p.move.from)){
-                    printf("Multiple:\n");
                     PrintMove(move_p.move);
                     PrintMove(current);
                     //Multiple moves can move to the same square
@@ -1111,9 +1110,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     }
     read_pos--;
     if(str[read_pos] == 'x'){
-        printf("x\n");
         if(read_pos == 0){
-            printf("goto\n");
             goto len_2;
         }
         read_pos--;
