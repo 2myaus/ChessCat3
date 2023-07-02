@@ -237,15 +237,15 @@ void PrintPosition(Game *game){
         for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
             Square checking = {.row = row, .col = col};
             if(white){
-                printf("\e[30m\e[107m");
+                printf("\e[30;107m");
             }
             else{
-                printf("\e[0m\e[40m");
+                printf("\e[0;40m");
             }
             printf("%c", GetChar(GetPiece(&(game->position), checking)));
             white = !white;
         }
-        printf("\e[0m\e[40m\n");//TODO: Replace this with something to actually reset to default
+        printf("\e[m\n");
         white = !white;
     }
 }
