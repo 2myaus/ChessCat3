@@ -1160,8 +1160,79 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     }
     read_pos--;
     if(read_pos == 0){
-        //TODO: Iterate through possible moves, first 2 chars in string could be a square OR piece-col OR piece-row.
+        //Iterate through possible moves, first 2 chars in string could be a square OR piece-col OR piece-row.
         //If it's ambiguous or invalid, reject the move
+        char char1_lowered = tolower(str[0]);
+        if(char1_lowered - 'a' > 25 || char1_lowered - 'a' < 0){
+            //Not an alphabet character
+            return move_p_final;
+        }
+
+        char char2_lowered = tolower(str[1]);
+        if(char2_lowered - 'a' <= 25 && char2_lowered - 'a' >= 0){
+            //Alphabet character; order must be piece-col
+            int16_t colhint = char2_lowered - 'a';
+            PieceType piecehint = GetPieceFromChar(char1_lowered).type;
+
+            if(piecehint == Empty || colhint < 0 || colhint > 25){
+                return move_p_final;
+            }
+
+            //Iterate through moves to find those with matching cols and piece types
+            Move moves[GetPossibleMoves(position, NULL)];
+            uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Make this more efficient
+
+            for(uint16_t i = 0; i < num_moves; i++){
+                Move current = moves[i];
+                if(MovesIntoCheck(position, current)){ continue; }
+                Piece moving_piece = GetPiece(position, current.from);
+                if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
+                if(SameSquare(current.to, to_square) && moving_piece.type == piecehint && current.from.col == colhint){
+                    if(IsValidSquare(move_p.move.from)){
+                        //Multiple moves can move to the same square
+                        return move_p_final;
+                    }
+                    move_p.move = current;
+                }
+            }
+
+            goto pawn_validate;
+        }
+        else if(char2_lowered - '0' <= 9 && char2_lowered >= 0){
+            //Numerical character; order must be piece-row or col-row
+            int16_t colhint = char1_lowered - 'a';
+            PieceType piecehint = GetPieceFromChar(char1_lowered).type;
+
+            if(piecehint == Empty && (colhint < 0 || colhint > 25)){
+                return move_p_final;
+            }
+
+            int16_t rowhint = char2_lowered - '0' - 1;
+
+            if(rowhint < 0 || rowhint > 8){
+                return move_p_final;
+            }
+
+            //Iterate through moves to find those with matching cols or piece types, and matching rows
+            Move moves[GetPossibleMoves(position, NULL)];
+            uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Make this more efficient
+
+            for(uint16_t i = 0; i < num_moves; i++){
+                Move current = moves[i];
+                if(MovesIntoCheck(position, current)){ continue; }
+                Piece moving_piece = GetPiece(position, current.from);
+                if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
+                if(SameSquare(current.to, to_square) && (moving_piece.type == piecehint || current.from.col == colhint) && current.from.row == rowhint){
+                    if(IsValidSquare(move_p.move.from)){
+                        //Multiple moves can move to the same square
+                        return move_p_final;
+                    }
+                    move_p.move = current;
+                }
+            }
+            goto pawn_validate;
+        }
+        //Invalid order
         return move_p_final;
     }
     read_pos--;
@@ -1175,7 +1246,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
         //Should always equal 0 because 9-len strings would have to be pawn promotions which wouldn't get this far.
         //The first part here should always be piece-col-2row
     }
-    
+
     pawn_validate:
     if(move_p.promotion != Empty && (GetPiece(position, move_p.move.from).type != Pawn || !IsOnPromotionRank(position, move_p.move.to, position->to_move))){
         return move_p_final;
