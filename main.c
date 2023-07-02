@@ -1021,7 +1021,23 @@ bool MovesIntoCheck(UniversalPosition *position, Move move){
     return CanCaptureRoyal(&position_copy);
 }
 
-bool IsMoveLegal(UniversalPosition *position, Move move){ //Expensive to use, better to use MovesIntoCheck
+bool IsMoveLegal(UniversalPosition *position, Move move, PieceType promotion){ //Check if a move meets qualifications to be legal. Does not check if it is POSSIBLE
+    MovePromotion move_p = {.move = move, .promotion = promotion};
+    if(MovesIntoCheck(position, move_p.move)){
+        return false;
+    }
+    Piece moving = GetPiece(position, move_p.move.from);
+    if(moving.type == Pawn && IsOnPromotionRank(position, move_p.move.to, position->to_move)){
+        //Promotes
+        if(move_p.promotion == King || move_p.promotion == Empty){
+            return false;
+        }
+    }
+    //TODO: Check if castle is possible
+    return true;
+}
+
+bool IsMoveLegalAndPossible(UniversalPosition *position, Move move){ //Expensive to use, better to use MovesIntoCheck
     if(MovesIntoCheck(position, move)){
         return false;
     }
@@ -1095,7 +1111,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
         for(uint16_t i = 0; i < num_moves; i++){
             Move current = moves[i];
-            if(MovesIntoCheck(position, current)){ continue; }
+            if(!IsMoveLegal(position, current, move_p.promotion)){ continue; }
             if(GetPiece(position, current.from).type != Pawn){ continue; }
             if(SameSquare(current.to, to_square)){
                 if(IsValidSquare(move_p.move.from)){
@@ -1143,7 +1159,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
         for(uint16_t i = 0; i < num_moves; i++){
             Move current = moves[i];
-            if(MovesIntoCheck(position, current)){ continue; }
+            if(!IsMoveLegal(position, current, move_p.promotion)){ continue; }
             Piece moving_piece = GetPiece(position, current.from);
             if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
             if(SameSquare(current.to, to_square) && (moving_piece.type == piecehint || (current.from.col == colhint && moving_piece.type == Pawn))){
@@ -1183,7 +1199,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
             for(uint16_t i = 0; i < num_moves; i++){
                 Move current = moves[i];
-                if(MovesIntoCheck(position, current)){ continue; }
+                if(!IsMoveLegal(position, current, move_p.promotion)){ continue; }
                 Piece moving_piece = GetPiece(position, current.from);
                 if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
                 if(SameSquare(current.to, to_square) && moving_piece.type == piecehint && current.from.col == colhint){
@@ -1218,7 +1234,7 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
 
             for(uint16_t i = 0; i < num_moves; i++){
                 Move current = moves[i];
-                if(MovesIntoCheck(position, current)){ continue; }
+                if(!IsMoveLegal(position, current, move_p.promotion)){ continue; }
                 Piece moving_piece = GetPiece(position, current.from);
                 if(move_p.promotion != Empty && moving_piece.type != Pawn){ continue; }
                 if(SameSquare(current.to, to_square) && (moving_piece.type == piecehint || current.from.col == colhint) && current.from.row == rowhint){
