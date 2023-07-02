@@ -1056,11 +1056,13 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     int16_t read_pos = len;
     if(strchr(str, '=') != NULL){
         //If the string contains an =, set the promotion piece type
-        Piece promote_to = GetPieceFromChar(*(str + len - 1));
+        char promo_char = str[len - 1];
+        Piece promote_to = GetPieceFromChar(promo_char);
         if(promote_to.type != Empty){
             move_p.promotion = promote_to.type;
         }
         else{
+            printf("Invalid to promote to %c!\n", promo_char);
             return move_p_final;
         }
         read_pos -= 2;
@@ -1345,9 +1347,13 @@ int main(int argc, char* argv[]){
     while(true){
         char movestrbuf[16];
         fgets(movestrbuf, 9, stdin);
+        movestrbuf[strlen(movestrbuf) - 1] = '\0'; //Remove newline
         MovePromotion next = GetMoveFromString(&g.position, movestrbuf);
         if(IsValidMove(next.move)){
             MakeMove(&g.position, next.move, next.promotion);
+            PrintPosition(&g);
+        }
+        else if(movestrbuf[0] == '\n'){
             PrintPosition(&g);
         }
     }
