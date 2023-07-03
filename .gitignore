@@ -4,3 +4,7 @@
 !/.gitignore
 !/Makefile
 !/libchesscat.h
+!/demo
+/demo/*
+!/demo/demo.c
+!/demo/Makefile
