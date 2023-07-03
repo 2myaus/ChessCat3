@@ -8,7 +8,7 @@
 #define CHESSCAT_MAX_BOARD_SIZE 23 //Max board width or height
 
 #define CHESSCAT_NUM_COLORS 4 //Number of colors supported
-#define NUM_COLOR_BITS CHESSCAT_MIN_BITS_REQUIRED(CHESSCAT_NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)
+#define CHESSCAT_NUM_COLOR_BITS CHESSCAT_MIN_BITS_REQUIRED(CHESSCAT_NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)
 /*
 chesscat_EColor layout:
    B
@@ -46,7 +46,7 @@ typedef struct {
 
 typedef struct {
     chesscat_EPieceType type : 5;
-    chesscat_EColor color : NUM_COLOR_BITS;
+    chesscat_EColor color : CHESSCAT_NUM_COLOR_BITS;
     bool is_royal : 1;
 } chesscat_Piece;
 
@@ -94,7 +94,7 @@ typedef struct{
 
 typedef struct{
     chesscat_GameRules game_rules;
-    chesscat_EColor to_move : NUM_COLOR_BITS;
+    chesscat_EColor to_move : CHESSCAT_NUM_COLOR_BITS;
     chesscat_Square passantable_square; //Should be set to -1 -1 if no square is available
     chesscat_Square passant_target_square; //The pawn to be taken if en passant happens
     _chesscat_ColorData color_data[CHESSCAT_NUM_COLORS]; //Whether the king or rooks have moved
