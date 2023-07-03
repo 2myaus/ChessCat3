@@ -120,8 +120,8 @@ typedef enum{
 /* main.c */
 bool _chesscat_same_squares(chesscat_Square s1, chesscat_Square s2);
 bool _chesscat_same_move(chesscat_Move m1, chesscat_Move m2);
-bool _chesscat_is_valid_square(chesscat_Square square);
-bool _chesscat_is_valid_move(chesscat_Move m);
+bool chesscat_is_valid_square(chesscat_Square square);
+bool chesscat_is_valid_move(chesscat_Move m);
 bool chesscat_square_in_bounds(chesscat_Position *position, chesscat_Square square);
 bool _chesscat_square_on_promotion_rank(chesscat_Position *position, chesscat_Square square, chesscat_EColor color);
 bool _chesscat_position_ignores_checks(chesscat_Position *position);
@@ -143,12 +143,10 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move);
 void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 bool chesscat_moves_into_check(chesscat_Position *position, chesscat_Move move);
 bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType promotion);
+bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move);
 void chesscat_game_make_move(chesscat_Game *game, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 void _chesscat_set_default_rules(chesscat_GameRules *rules);
 void chesscat_set_default_game(chesscat_Game *game);
 chesscat_Piece chesscat_get_piece_from_char(char c);
 chesscat_Square chesscat_get_square_from_string(char *str);
 chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position, char *str);
-char chesscat_get_piece_char(chesscat_Piece piece);
-void _chesscat_print_move(chesscat_Move m);
-void _chesscat_print_position(chesscat_Game *game);

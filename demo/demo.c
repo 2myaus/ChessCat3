@@ -1,6 +1,75 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "../libchesscat.h"
+
+char GetPieceChar(chesscat_Piece piece)
+{
+    char base;
+    switch (piece.type)
+    {
+    case Pawn:
+        base = 'p';
+        break;
+    case King:
+        base = 'k';
+        break;
+    case Queen:
+        base = 'q';
+        break;
+    case Rook:
+        base = 'r';
+        break;
+    case Knight:
+        base = 'n';
+        break;
+    case Bishop:
+        base = 'b';
+        break;
+    default:
+        base = ' ';
+        break;
+    }
+    if (piece.color == White)
+    {
+        return toupper(base);
+    }
+    return base;
+}
+
+void PrintMove(chesscat_Position *position, chesscat_Move m)
+{
+    if (!chesscat_square_in_bounds(position, m.from) || !chesscat_square_in_bounds(position, m.from))
+    {
+        return;
+    }
+    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
+}
+
+void PrintPosition(chesscat_Game *game)
+{
+    bool white = true;
+    for (int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--)
+    {
+        for (int8_t col = 0; col < game->position.game_rules.board_width; col++)
+        {
+            chesscat_Square checking = {.row = row, .col = col};
+            if (white)
+            {
+                printf("\e[1;30;107m");
+            }
+            else
+            {
+                printf("\e[1;97;40m");
+            }
+            printf("%c", GetPieceChar(chesscat_get_piece_at_square(&(game->position), checking)));
+            white = !white;
+        }
+        printf("\e[m\n");
+        white = !white;
+    }
+}
 
 /*   Main   */
 
@@ -13,15 +82,8 @@ int main(/*int argc, char* argv[]*/)
 
     chesscat_Game g;
     chesscat_set_default_game(&g);
-    chesscat_Move move_buf[2048];
-    uint16_t num_moves = chesscat_get_all_possible_moves(&g.position, move_buf);
-    printf("Moves: %d\n", num_moves);
-    for (uint16_t i = 0; i < num_moves; i++)
-    {
-        _chesscat_print_move(move_buf[i]);
-    }
 
-    _chesscat_print_position(&g);
+    PrintPosition(&g);
 
     while (true)
     {
@@ -29,14 +91,14 @@ int main(/*int argc, char* argv[]*/)
         fgets(movestrbuf, 9, stdin);
         movestrbuf[strlen(movestrbuf) - 1] = '\0'; // Remove newline
         chesscat_MovePromotion next = chesscat_get_move_from_string(&g.position, movestrbuf);
-        if (_chesscat_is_valid_move(next.move))
+        if (chesscat_is_valid_move(next.move))
         {
             chesscat_make_move(&g.position, next.move, next.promotion);
-            _chesscat_print_position(&g);
+            PrintPosition(&g);
         }
         else if (movestrbuf[0] == '\n')
         {
-            _chesscat_print_position(&g);
+            PrintPosition(&g);
         }
     }
 }

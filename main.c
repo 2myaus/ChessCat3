@@ -20,14 +20,14 @@ bool _chesscat_same_move(chesscat_Move m1, chesscat_Move m2)
     return _chesscat_same_squares(m1.from, m2.from) && _chesscat_same_squares(m1.to, m2.to);
 }
 
-bool _chesscat_is_valid_square(chesscat_Square square)
+bool chesscat_is_valid_square(chesscat_Square square)
 {
     return square.col > -1 && square.row > -1;
 }
 
-bool _chesscat_is_valid_move(chesscat_Move m)
+bool chesscat_is_valid_move(chesscat_Move m)
 {
-    return _chesscat_is_valid_square(m.from) && _chesscat_is_valid_square(m.to);
+    return chesscat_is_valid_square(m.from) && chesscat_is_valid_square(m.to);
 }
 
 /*   Position utility functions   */
@@ -133,7 +133,7 @@ chesscat_Square _chesscat_find_lower_rook(chesscat_Position *position, chesscat_
     if (color == White || color == Black)
     {
         chesscat_Square king_square = _chesscat_find_king(position, color);
-        if (!_chesscat_is_valid_square(king_square))
+        if (!chesscat_is_valid_square(king_square))
         {
             return none;
         }
@@ -150,7 +150,7 @@ chesscat_Square _chesscat_find_lower_rook(chesscat_Position *position, chesscat_
     if (color == Green || color == Red)
     {
         chesscat_Square king_square = _chesscat_find_king(position, color);
-        if (!_chesscat_is_valid_square(king_square))
+        if (!chesscat_is_valid_square(king_square))
         {
             return none;
         }
@@ -173,7 +173,7 @@ chesscat_Square _chesscat_find_upper_rook(chesscat_Position *position, chesscat_
     if (color == White || color == Black)
     {
         chesscat_Square king_square = _chesscat_find_king(position, color);
-        if (!_chesscat_is_valid_square(king_square))
+        if (!chesscat_is_valid_square(king_square))
         {
             return none;
         }
@@ -190,7 +190,7 @@ chesscat_Square _chesscat_find_upper_rook(chesscat_Position *position, chesscat_
     if (color == Green || color == Red)
     {
         chesscat_Square king_square = _chesscat_find_king(position, color);
-        if (!_chesscat_is_valid_square(king_square))
+        if (!chesscat_is_valid_square(king_square))
         {
             return none;
         }
@@ -231,7 +231,7 @@ void _chesscat_set_next_to_play(chesscat_Position *position)
         position->to_move = White;
         break;
     }
-    while (position->color_data[position->to_move].is_in_game == false || !_chesscat_is_valid_square(_chesscat_find_king(position, position->to_move)))
+    while (position->color_data[position->to_move].is_in_game == false || !chesscat_is_valid_square(_chesscat_find_king(position, position->to_move)))
     {
         switch (position->to_move)
         {
@@ -372,7 +372,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                 chesscat_Square lower_rook = _chesscat_find_lower_rook(position, piece.color);
                 int8_t coldist = abs(square.col - lower_rook.col);
                 int8_t rowdist = abs(square.row - lower_rook.row);
-                if (_chesscat_is_valid_square(lower_rook) && (coldist > 1 || rowdist > 1))
+                if (chesscat_is_valid_square(lower_rook) && (coldist > 1 || rowdist > 1))
                 {
                     if (piece.color == White || piece.color == Black)
                     {
@@ -420,7 +420,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                 chesscat_Square upper_rook = _chesscat_find_upper_rook(position, piece.color);
                 int8_t coldist = abs(square.col - upper_rook.col);
                 int8_t rowdist = abs(square.row - upper_rook.row);
-                if (_chesscat_is_valid_square(upper_rook) && (coldist > 1 || rowdist > 1))
+                if (chesscat_is_valid_square(upper_rook) && (coldist > 1 || rowdist > 1))
                 {
                     if (piece.color == White || piece.color == Black)
                     {
@@ -999,7 +999,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
                 rookMove.from = rookSquare;
                 chesscat_Square rookSquare2 = {.row = rookSquare.row, .col = move.to.col - 1};
                 rookMove.to = rookSquare2;
-                if (_chesscat_is_valid_square(rookSquare))
+                if (chesscat_is_valid_square(rookSquare))
                 {
                     chesscat_move_pieces(position, rookMove);
                 }
@@ -1011,7 +1011,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
                 rookMove.from = rookSquare;
                 chesscat_Square rookSquare2 = {.row = rookSquare.row, .col = move.to.col + 1};
                 rookMove.to = rookSquare2;
-                if (_chesscat_is_valid_square(rookSquare))
+                if (chesscat_is_valid_square(rookSquare))
                 {
                     chesscat_move_pieces(position, rookMove);
                 }
@@ -1027,7 +1027,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
                 rookMove.from = rookSquare;
                 chesscat_Square rookSquare2 = {.row = move.to.col - 1, .col = rookSquare.col};
                 rookMove.to = rookSquare2;
-                if (_chesscat_is_valid_square(rookSquare))
+                if (chesscat_is_valid_square(rookSquare))
                 {
                     chesscat_move_pieces(position, rookMove);
                 }
@@ -1039,7 +1039,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
                 rookMove.from = rookSquare;
                 chesscat_Square rookSquare2 = {.row = move.to.col + 1, .col = rookSquare.col};
                 rookMove.to = rookSquare2;
-                if (_chesscat_is_valid_square(rookSquare))
+                if (chesscat_is_valid_square(rookSquare))
                 {
                     chesscat_move_pieces(position, rookMove);
                 }
@@ -1182,6 +1182,19 @@ bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, che
     }
     // TODO: Check if castle is possible
     return true;
+}
+
+bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move){
+    chesscat_Move moves[chesscat_get_possible_moves_from(position, move.from, NULL)];
+    uint16_t num_moves = chesscat_get_possible_moves_from(position, move.from, moves); //TODO: Make this more efficient
+
+    for(uint16_t i = 0; i < num_moves; i++){
+        if(_chesscat_same_move(moves[i], move)){
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /*   chesscat_Game utility functions   */
@@ -1376,7 +1389,6 @@ chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position
         }
         else
         {
-            printf("Invalid to promote to %c!\n", promo_char);
             return move_p_final;
         }
         read_pos -= 2;
@@ -1390,7 +1402,8 @@ chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position
     strncpy(square_copy_buf, str + read_pos, 2);
     square_copy_buf[2] = '\0';
     to_square = chesscat_get_square_from_string(square_copy_buf);
-    if (!_chesscat_is_valid_square(to_square))
+    move_p.move.to = to_square;
+    if (!chesscat_is_valid_square(to_square))
     {
         read_pos--;
         if (read_pos < 0)
@@ -1401,7 +1414,7 @@ chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position
         square_copy_buf[3] = '\0';
         to_square = chesscat_get_square_from_string(square_copy_buf);
     }
-    if (!_chesscat_is_valid_square(to_square))
+    if (!chesscat_is_valid_square(to_square))
     {
         return move_p_final;
     }
@@ -1425,7 +1438,7 @@ len_2:
             }
             if (_chesscat_same_squares(current.to, to_square))
             {
-                if (_chesscat_is_valid_square(move_p.move.from))
+                if (chesscat_is_valid_square(move_p.move.from))
                 {
                     // Multiple moves can move to the same square
                     return move_p_final;
@@ -1487,7 +1500,7 @@ len_2:
             }
             if (_chesscat_same_squares(current.to, to_square) && (moving_piece.type == piecehint || (current.from.col == colhint && moving_piece.type == Pawn)))
             {
-                if (_chesscat_is_valid_square(move_p.move.from))
+                if (chesscat_is_valid_square(move_p.move.from))
                 {
                     // Multiple moves can move to the same square
                     return move_p_final;
@@ -1540,7 +1553,7 @@ len_2:
                 }
                 if (_chesscat_same_squares(current.to, to_square) && moving_piece.type == piecehint && current.from.col == colhint)
                 {
-                    if (_chesscat_is_valid_square(move_p.move.from))
+                    if (chesscat_is_valid_square(move_p.move.from))
                     {
                         // Multiple moves can move to the same square
                         return move_p_final;
@@ -1587,7 +1600,7 @@ len_2:
                 }
                 if (_chesscat_same_squares(current.to, to_square) && (moving_piece.type == piecehint || current.from.col == colhint) && current.from.row == rowhint)
                 {
-                    if (_chesscat_is_valid_square(move_p.move.from))
+                    if (chesscat_is_valid_square(move_p.move.from))
                     {
                         // Multiple moves can move to the same square
                         return move_p_final;
@@ -1604,14 +1617,41 @@ len_2:
     if (read_pos == 0)
     {
         // First part could be piece-col-row or col-2row (2row is 2-digit row num)
-        // TODO: Iterate moves here
+
+        char square_copy[4];
+        strncpy(square_copy, str, 3);
+        square_copy[3] = '\0';
+
+        move_p.move.from = chesscat_get_square_from_string(square_copy);
+        if(chesscat_is_valid_square(move_p.move.from)){
+            goto pawn_validate;
+        }
+        //At this point the order must be piece-col-row
+        
+        strncpy(square_copy, str + 1, 2);
+        square_copy[2] = '\0';
+        move_p.move.from = chesscat_get_square_from_string(square_copy);
+        if(chesscat_is_valid_square(move_p.move.from)){
+            goto pawn_validate;
+        }
+
         return move_p_final;
     }
     read_pos--;
     if (read_pos == 0)
     {
         // Should always equal 0 because 9-len strings would have to be pawn promotions which wouldn't get this far.
-        // The first part here should always be piece-col-2row
+        // The first part of the string should always be piece-col-2row if it reaches here
+        char square_copy[4];
+        strncpy(square_copy, str + 1, 3);
+        square_copy[3] = '\0';
+
+        move_p.move.from = chesscat_get_square_from_string(square_copy);
+        if(chesscat_is_valid_square(move_p.move.from)){
+            goto pawn_validate;
+        }
+
+        return move_p_final;
     }
 
 pawn_validate:
@@ -1623,76 +1663,8 @@ pawn_validate:
     {
         return move_p_final;
     }
-    move_p_final = move_p;
+    if(chesscat_is_move_legal(position, move_p.move, move_p.promotion) && chesscat_is_move_possible(position, move_p.move)){
+        move_p_final = move_p;
+    }
     return move_p_final;
-}
-
-/*   Output   */
-
-char chesscat_get_piece_char(chesscat_Piece piece)
-{
-    char base;
-    switch (piece.type)
-    {
-    case Pawn:
-        base = 'p';
-        break;
-    case King:
-        base = 'k';
-        break;
-    case Queen:
-        base = 'q';
-        break;
-    case Rook:
-        base = 'r';
-        break;
-    case Knight:
-        base = 'n';
-        break;
-    case Bishop:
-        base = 'b';
-        break;
-    default:
-        base = ' ';
-        break;
-    }
-    if (piece.color == White)
-    {
-        return toupper(base);
-    }
-    return base;
-}
-
-void _chesscat_print_move(chesscat_Move m)
-{
-    if (!_chesscat_is_valid_square(m.from) || !_chesscat_is_valid_square(m.to))
-    {
-        return;
-    }
-    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
-}
-
-void _chesscat_print_position(chesscat_Game *game)
-{
-    bool white = true;
-    for (int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--)
-    {
-        for (int8_t col = 0; col < game->position.game_rules.board_width; col++)
-        {
-            chesscat_Square checking = {.row = row, .col = col};
-            if (white)
-            {
-                printf("\e[1;30;107m");
-            }
-            else
-            {
-                printf("\e[1;97;40m");
-            }
-            printf("%c", chesscat_get_piece_char(chesscat_get_piece_at_square(&(game->position), checking)));
-            white = !white;
-        }
-        printf("\e[m\n");
-        white = !white;
-    }
 }
