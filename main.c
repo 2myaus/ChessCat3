@@ -6,102 +6,7 @@
 
 #include "misc.h"
 
-char GetChar(Piece piece){
-    char base;
-    switch (piece.type) {
-        case Pawn:
-            base = 'p';
-            break;
-        case King:
-            base = 'k';
-            break;
-        case Queen:
-            base = 'q';
-            break;
-        case Rook:
-            base = 'r';
-            break;
-        case Knight:
-            base = 'n';
-            break;
-        case Bishop:
-            base = 'b';
-            break;
-        default:
-            base = ' ';
-            break;
-    }
-    if(piece.color == White){
-        return toupper(base);
-    }
-    return base;
-}
-
-Piece GetPieceFromChar(char c){
-    Piece making = {.type = Empty, .is_royal = false, .color = White};
-    switch (tolower(c)) {
-        case 'p':
-            making.type = Pawn;
-            break;
-        case 'k':
-            making.type = King;
-            break;
-        case 'q':
-            making.type = Queen;
-            break;
-        case 'r':
-            making.type = Rook;
-            break;
-        case 'n':
-            making.type = Knight;
-            break;
-        case 'b':
-            making.type = Bishop;
-            break;
-        default:
-            making.type = Empty;
-            break;
-    }
-    if(!isupper(c)){
-        making.color = Black;
-    }
-    return making;
-}
-
-Square GetSquareFromString(char* str){
-    Square square = {.row = -1, .col = -1};
-
-    int len = strlen(str);
-    if(len == 2){
-        int rownum = str[1] - '0';
-        if(rownum < 1 || rownum > 9){
-            return square;
-        }
-        int colnum = str[0] - 'a';
-        if(colnum < 0 || colnum > 25){
-            return square;
-        }
-
-        square.row = rownum - 1;
-        square.col = colnum;
-    }
-    else if(len == 3){
-        int colnum = str[0] - 'a';
-        if(colnum < 0 || colnum > 25){
-            return square;
-        }
-
-        int rownum = atoi(str + 1);
-        if(rownum < 1){
-            return square;
-        }
-
-        square.row = rownum - 1;
-        square.col = colnum;
-    }
-
-    return square;
-}
+/*   Misc functions   */
 
 bool SameSquare(Square s1, Square s2){
     return s1.row == s2.row && s1.col == s2.col;
@@ -111,17 +16,20 @@ bool SameMove(Move m1, Move m2){
     return SameSquare(m1.from, m2.from) && SameSquare(m1.to, m2.to);
 }
 
-bool InBounds(UniversalPosition *position, Square square){
-    return square.row >= 0 && square.col >= 0
-        && square.row < position->game_rules.board_height && square.col < position->game_rules.board_width;
-}
-
 bool IsValidSquare(Square square){
     return square.col > -1 && square.row > -1;
 }
 
 bool IsValidMove(Move m){
     return IsValidSquare(m.from) && IsValidSquare(m.to);
+}
+
+
+/*   Position utility functions   */
+
+bool InBounds(UniversalPosition *position, Square square){
+    return square.row >= 0 && square.col >= 0
+        && square.row < position->game_rules.board_height && square.col < position->game_rules.board_width;
 }
 
 bool IsOnPromotionRank(UniversalPosition *position, Square square, Color color){
@@ -134,6 +42,22 @@ bool IsOnPromotionRank(UniversalPosition *position, Square square, Color color){
         return square.col == position->game_rules.board_width - 1;
     case Red:
         return square.col == 0;
+    }
+    return false;
+}
+
+bool ShouldIgnoreChecks(UniversalPosition *position){
+    if(position->game_rules.ignore_checks){
+        return true;
+    }
+    uint8_t num_colors = 0;
+    if(position->color_data[White].is_in_game) { num_colors++; }
+    if(position->color_data[Black].is_in_game) { num_colors++; }
+    if(position->color_data[Red].is_in_game) { num_colors++; }
+    if(position->color_data[Green].is_in_game) { num_colors++; }
+
+    if(num_colors > 2){
+        return true;
     }
     return false;
 }
@@ -222,35 +146,63 @@ Square FindUpperRook(UniversalPosition *position, Color color){
     return none;
 }
 
-
-void PrintMove(Move m){
-    if(!IsValidSquare(m.from) || !IsValidSquare(m.to)){
+void SetNextToPlay(UniversalPosition *position){
+    if(position->color_data[White].is_in_game == false &&
+    position->color_data[Black].is_in_game == false &&
+    position->color_data[Green].is_in_game == false &&
+    position->color_data[Red].is_in_game == false){
         return;
     }
-    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
+    switch (position->to_move) {
+        case White:
+            position->to_move = Red;
+            break;
+        case Red:
+            position->to_move = Black;
+            break;
+        case Black:
+            position->to_move = Green;
+            break;
+        default:
+            position->to_move = White;
+            break;
+    }
+    while(position->color_data[position->to_move].is_in_game == false || !IsValidSquare(FindKing(position, position->to_move))){
+        switch (position->to_move) {
+            case White:
+                position->to_move = Red;
+                break;
+            case Red:
+                position->to_move = Black;
+                break;
+            case Black:
+                position->to_move = Green;
+                break;
+            default:
+                position->to_move = White;
+                break;
+        }
+    }
 }
 
-void PrintPosition(Game *game){
-    bool white = true;
-    for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
-        for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
-            Square checking = {.row = row, .col = col};
-            if(white){
-                printf("\e[1;30;107m");
-            }
-            else{
-                printf("\e[1;97;40m");
-            }
-            printf("%c", GetChar(GetPiece(&(game->position), checking)));
-            white = !white;
+MoveCastleType GetCastleType(UniversalPosition *position, Move move){
+    int8_t coldist = move.to.col - move.from.col;
+    int8_t rowdist = move.to.row - move.from.row;
+
+    Piece piece = GetPiece(position, move.from);
+    if(piece.type == King && piece.is_royal && (abs(rowdist) > 1 || abs(coldist > 1))){
+        if(rowdist > 0 || coldist > 0){
+            return UpperCastle;
         }
-        printf("\e[m\n");
-        white = !white;
+        if(rowdist < 0 || coldist < 0){
+            return LowerCastle;
+        }        
     }
+    return NotCastle;
 }
 
 bool ColorCanCapture(UniversalPosition *position, Color color, Piece piece){
+    //NOTE: Position is used here because gamerules may change what colors can be captured
     return (piece.type == Empty || piece.color != color);
 }
 
@@ -795,18 +747,15 @@ uint16_t GetPossibleMoves(UniversalPosition *position, Move moves_buf[]){
     return move_count;
 }
 
-bool ShouldIgnoreChecks(UniversalPosition *position){
-    if(position->game_rules.ignore_checks){
-        return true;
-    }
-    uint8_t num_colors = 0;
-    if(position->color_data[White].is_in_game) { num_colors++; }
-    if(position->color_data[Black].is_in_game) { num_colors++; }
-    if(position->color_data[Red].is_in_game) { num_colors++; }
-    if(position->color_data[Green].is_in_game) { num_colors++; }
+bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be captured in the given position
+    Move moves[GetPossibleMoves(position, NULL)];
+    uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Replace this with something more efficient
 
-    if(num_colors > 2){
-        return true;
+    for(uint16_t i = 0; i < num_moves; i++){
+        Move move = moves[i];
+        if(GetPiece(position, move.to).is_royal){
+            return true;
+        }
     }
     return false;
 }
@@ -873,74 +822,6 @@ void MoveSetPieces(UniversalPosition *position, Move move) { // Sets piece posit
     SetPiece(position, move.from, empty);
 }
 
-void SetNextToPlay(UniversalPosition *position){
-    if(position->color_data[White].is_in_game == false &&
-    position->color_data[Black].is_in_game == false &&
-    position->color_data[Green].is_in_game == false &&
-    position->color_data[Red].is_in_game == false){
-        return;
-    }
-    switch (position->to_move) {
-        case White:
-            position->to_move = Red;
-            break;
-        case Red:
-            position->to_move = Black;
-            break;
-        case Black:
-            position->to_move = Green;
-            break;
-        default:
-            position->to_move = White;
-            break;
-    }
-    while(position->color_data[position->to_move].is_in_game == false || !IsValidSquare(FindKing(position, position->to_move))){
-        switch (position->to_move) {
-            case White:
-                position->to_move = Red;
-                break;
-            case Red:
-                position->to_move = Black;
-                break;
-            case Black:
-                position->to_move = Green;
-                break;
-            default:
-                position->to_move = White;
-                break;
-        }
-    }
-}
-
-MoveCastleType GetCastleType(UniversalPosition *position, Move move){
-    int8_t coldist = move.to.col - move.from.col;
-    int8_t rowdist = move.to.row - move.from.row;
-
-    Piece piece = GetPiece(position, move.from);
-    if(piece.type == King && piece.is_royal && (abs(rowdist) > 1 || abs(coldist > 1))){
-        if(rowdist > 0 || coldist > 0){
-            return UpperCastle;
-        }
-        if(rowdist < 0 || coldist < 0){
-            return LowerCastle;
-        }        
-    }
-    return NotCastle;
-}
-
-bool CanCaptureRoyal(UniversalPosition *position){ // Whether a royal can be captured in the given position
-    Move moves[GetPossibleMoves(position, NULL)];
-    uint16_t num_moves = GetPossibleMoves(position, moves); //TODO: Replace this with something more efficient
-
-    for(uint16_t i = 0; i < num_moves; i++){
-        Move move = moves[i];
-        if(GetPiece(position, move.to).is_royal){
-            return true;
-        }
-    }
-    return false;
-}
-
 void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     Piece piece = GetPiece(position, move.from);
     Square none = {.row = -1, .col = -1};
@@ -1004,11 +885,6 @@ void MakeMove(UniversalPosition *position, Move move, PieceType pawn_promotion){
     SetNextToPlay(position);
 }
 
-void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
-    MakeMove(&(game->position), move, pawn_promotion);
-    //TODO: Move Logging (including pawn promotion log)
-}
-
 bool MovesIntoCheck(UniversalPosition *position, Move move){
     if(ShouldIgnoreChecks(position)){
         return false;
@@ -1037,6 +913,152 @@ bool IsMoveLegal(UniversalPosition *position, Move move, PieceType promotion){ /
     return true;
 }
 
+/*   Game utility functions   */
+
+void GameMakeMove(Game *game, Move move, PieceType pawn_promotion){
+    MakeMove(&(game->position), move, pawn_promotion);
+    //TODO: Move Logging (including pawn promotion log)
+}
+
+/*   Game creation functions   */
+
+void SetDefaultRules(GameRules *rules){
+    rules->allow_castle = true;
+    rules->allow_passant = true;
+    rules->board_height = 8;
+    rules->board_width = 8;
+    rules->ignore_checks = false;
+    rules->allow_castle = true;
+    rules->allow_passant = true;
+}
+
+void SetDefaultGame(Game *game){
+    Piece wPawn = {.color = White, .is_royal = false, .type = Pawn};
+    Piece wKing = {.color = White, .is_royal = true, .type = King};
+    Piece wQueen = {.color = White, .is_royal = false, .type = Queen};
+    Piece wRook = {.color = White, .is_royal = false, .type = Rook};
+    Piece wKnight = {.color = White, .is_royal = false, .type = Knight};
+    Piece wBishop = {.color = White, .is_royal = false, .type = Bishop};
+
+    Piece bPawn = {.color = Black, .is_royal = false, .type = Pawn};
+    Piece bKing = {.color = Black, .is_royal = true, .type = King};
+    Piece bQueen = {.color = Black, .is_royal = false, .type = Queen};
+    Piece bRook = {.color = Black, .is_royal = false, .type = Rook};
+    Piece bKnight = {.color = Black, .is_royal = false, .type = Knight};
+    Piece bBishop = {.color = Black, .is_royal = false, .type = Bishop};
+    Piece empty = {.color = White, .is_royal = false, .type = Empty};
+
+    SetDefaultRules(&(game->position.game_rules));
+    for(uint8_t col = 0; col <= 7; col++){
+        SetPieceAtPos(&(game->position), 1, col, wPawn);
+        SetPieceAtPos(&(game->position), 6, col, bPawn);
+        SetPieceAtPos(&(game->position), 2, col, empty);
+        SetPieceAtPos(&(game->position), 3, col, empty);
+        SetPieceAtPos(&(game->position), 4, col, empty);
+        SetPieceAtPos(&(game->position), 5, col, empty);
+    }
+
+    SetPieceAtPos(&(game->position), 0, 0, wRook);
+    SetPieceAtPos(&(game->position), 0, 1, wKnight);
+    SetPieceAtPos(&(game->position), 0, 2, wBishop);
+    SetPieceAtPos(&(game->position), 0, 3, wQueen);
+    SetPieceAtPos(&(game->position), 0, 4, wKing);
+    SetPieceAtPos(&(game->position), 0, 5, wBishop);
+    SetPieceAtPos(&(game->position), 0, 6, wKnight);
+    SetPieceAtPos(&(game->position), 0, 7, wRook);
+
+    SetPieceAtPos(&(game->position), 7, 0, bRook);
+    SetPieceAtPos(&(game->position), 7, 1, bKnight);
+    SetPieceAtPos(&(game->position), 7, 2, bBishop);
+    SetPieceAtPos(&(game->position), 7, 3, bQueen);
+    SetPieceAtPos(&(game->position), 7, 4, bKing);
+    SetPieceAtPos(&(game->position), 7, 5, bBishop);
+    SetPieceAtPos(&(game->position), 7, 6, bKnight);
+    SetPieceAtPos(&(game->position), 7, 7, bRook);
+
+    game->position.num_checks[White] = 0;
+    game->position.num_checks[Black] = 0;
+
+    Square none = {.row = -1, .col = -1};
+    game->position.passantable_square = none;
+    game->position.color_data[White].is_in_game = true;
+    game->position.color_data[White].has_king_moved = false;
+    game->position.color_data[White].has_lower_rook_moved = false;
+    game->position.color_data[White].has_upper_rook_moved = false;
+
+    game->position.color_data[Black].is_in_game = true;
+    game->position.color_data[Black].has_king_moved = false;
+    game->position.color_data[Black].has_lower_rook_moved = false;
+    game->position.color_data[Black].has_upper_rook_moved = false;
+}
+
+/*   Input   */
+
+Piece GetPieceFromChar(char c){
+    Piece making = {.type = Empty, .is_royal = false, .color = White};
+    switch (tolower(c)) {
+        case 'p':
+            making.type = Pawn;
+            break;
+        case 'k':
+            making.type = King;
+            break;
+        case 'q':
+            making.type = Queen;
+            break;
+        case 'r':
+            making.type = Rook;
+            break;
+        case 'n':
+            making.type = Knight;
+            break;
+        case 'b':
+            making.type = Bishop;
+            break;
+        default:
+            making.type = Empty;
+            break;
+    }
+    if(!isupper(c)){
+        making.color = Black;
+    }
+    return making;
+}
+
+Square GetSquareFromString(char* str){
+    Square square = {.row = -1, .col = -1};
+
+    int len = strlen(str);
+    if(len == 2){
+        int rownum = str[1] - '0';
+        if(rownum < 1 || rownum > 9){
+            return square;
+        }
+        int colnum = str[0] - 'a';
+        if(colnum < 0 || colnum > 25){
+            return square;
+        }
+
+        square.row = rownum - 1;
+        square.col = colnum;
+    }
+    else if(len == 3){
+        int colnum = str[0] - 'a';
+        if(colnum < 0 || colnum > 25){
+            return square;
+        }
+
+        int rownum = atoi(str + 1);
+        if(rownum < 1){
+            return square;
+        }
+
+        square.row = rownum - 1;
+        square.col = colnum;
+    }
+
+    return square;
+}
 
 MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     Square none = {.row = -1, .col = -1};
@@ -1099,8 +1121,6 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
             if(GetPiece(position, current.from).type != Pawn){ continue; }
             if(SameSquare(current.to, to_square)){
                 if(IsValidSquare(move_p.move.from)){
-                    PrintMove(move_p.move);
-                    PrintMove(current);
                     //Multiple moves can move to the same square
                     return move_p_final;
                 }
@@ -1257,77 +1277,69 @@ MovePromotion GetMoveFromString(UniversalPosition *position, char* str){
     return move_p_final;
 }
 
-void SetDefaultRules(GameRules *rules){
-    rules->allow_castle = true;
-    rules->allow_passant = true;
-    rules->board_height = 8;
-    rules->board_width = 8;
-    rules->ignore_checks = false;
-    rules->allow_castle = true;
-    rules->allow_passant = true;
-}
+/*   Output   */
 
-void SetDefaultGame(Game *game){
-    Piece wPawn = {.color = White, .is_royal = false, .type = Pawn};
-    Piece wKing = {.color = White, .is_royal = true, .type = King};
-    Piece wQueen = {.color = White, .is_royal = false, .type = Queen};
-    Piece wRook = {.color = White, .is_royal = false, .type = Rook};
-    Piece wKnight = {.color = White, .is_royal = false, .type = Knight};
-    Piece wBishop = {.color = White, .is_royal = false, .type = Bishop};
-
-    Piece bPawn = {.color = Black, .is_royal = false, .type = Pawn};
-    Piece bKing = {.color = Black, .is_royal = true, .type = King};
-    Piece bQueen = {.color = Black, .is_royal = false, .type = Queen};
-    Piece bRook = {.color = Black, .is_royal = false, .type = Rook};
-    Piece bKnight = {.color = Black, .is_royal = false, .type = Knight};
-    Piece bBishop = {.color = Black, .is_royal = false, .type = Bishop};
-    Piece empty = {.color = White, .is_royal = false, .type = Empty};
-
-    SetDefaultRules(&(game->position.game_rules));
-    for(uint8_t col = 0; col <= 7; col++){
-        SetPieceAtPos(&(game->position), 1, col, wPawn);
-        SetPieceAtPos(&(game->position), 6, col, bPawn);
-        SetPieceAtPos(&(game->position), 2, col, empty);
-        SetPieceAtPos(&(game->position), 3, col, empty);
-        SetPieceAtPos(&(game->position), 4, col, empty);
-        SetPieceAtPos(&(game->position), 5, col, empty);
+char GetChar(Piece piece){
+    char base;
+    switch (piece.type) {
+        case Pawn:
+            base = 'p';
+            break;
+        case King:
+            base = 'k';
+            break;
+        case Queen:
+            base = 'q';
+            break;
+        case Rook:
+            base = 'r';
+            break;
+        case Knight:
+            base = 'n';
+            break;
+        case Bishop:
+            base = 'b';
+            break;
+        default:
+            base = ' ';
+            break;
     }
-
-    SetPieceAtPos(&(game->position), 0, 0, wRook);
-    SetPieceAtPos(&(game->position), 0, 1, wKnight);
-    SetPieceAtPos(&(game->position), 0, 2, wBishop);
-    SetPieceAtPos(&(game->position), 0, 3, wQueen);
-    SetPieceAtPos(&(game->position), 0, 4, wKing);
-    SetPieceAtPos(&(game->position), 0, 5, wBishop);
-    SetPieceAtPos(&(game->position), 0, 6, wKnight);
-    SetPieceAtPos(&(game->position), 0, 7, wRook);
-
-    SetPieceAtPos(&(game->position), 7, 0, bRook);
-    SetPieceAtPos(&(game->position), 7, 1, bKnight);
-    SetPieceAtPos(&(game->position), 7, 2, bBishop);
-    SetPieceAtPos(&(game->position), 7, 3, bQueen);
-    SetPieceAtPos(&(game->position), 7, 4, bKing);
-    SetPieceAtPos(&(game->position), 7, 5, bBishop);
-    SetPieceAtPos(&(game->position), 7, 6, bKnight);
-    SetPieceAtPos(&(game->position), 7, 7, bRook);
-
-    game->position.num_checks[White] = 0;
-    game->position.num_checks[Black] = 0;
-
-    Square none = {.row = -1, .col = -1};
-    game->position.passantable_square = none;
-    game->position.color_data[White].is_in_game = true;
-    game->position.color_data[White].has_king_moved = false;
-    game->position.color_data[White].has_lower_rook_moved = false;
-    game->position.color_data[White].has_upper_rook_moved = false;
-
-    game->position.color_data[Black].is_in_game = true;
-    game->position.color_data[Black].has_king_moved = false;
-    game->position.color_data[Black].has_lower_rook_moved = false;
-    game->position.color_data[Black].has_upper_rook_moved = false;
+    if(piece.color == White){
+        return toupper(base);
+    }
+    return base;
 }
 
-int main(int argc, char* argv[]){
+void PrintMove(Move m){
+    if(!IsValidSquare(m.from) || !IsValidSquare(m.to)){
+        return;
+    }
+    char getCol[8] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    printf("%c%d to %c%d\n", getCol[m.from.col], m.from.row + 1, getCol[m.to.col], m.to.row + 1);
+}
+
+void PrintPosition(Game *game){
+    bool white = true;
+    for(int8_t row = game->position.game_rules.board_height - 1; row >= 0; row--){
+        for(int8_t col = 0; col < game->position.game_rules.board_width; col++){
+            Square checking = {.row = row, .col = col};
+            if(white){
+                printf("\e[1;30;107m");
+            }
+            else{
+                printf("\e[1;97;40m");
+            }
+            printf("%c", GetChar(GetPiece(&(game->position), checking)));
+            white = !white;
+        }
+        printf("\e[m\n");
+        white = !white;
+    }
+}
+
+/*   Main   */
+
+int main(/*int argc, char* argv[]*/){
     printf("Piece size: %lu\n", sizeof(Piece));
     printf("Game size: %lu\n", sizeof(Game));
     printf("Square size: %lu\n", sizeof(Square));
