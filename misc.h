@@ -1,21 +1,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MIN_BITS_REQUIRED(value) ((sizeof(value) * 8) - __builtin_clz(value))
+#define CHESSCAT_INCLUDE_MISC_H
 
-#define MAX_BOARD_SIZE 23 //Max board width or height
+#define CHESSCAT_MIN_BITS_REQUIRED(value) ((sizeof(value) * 8) - __builtin_clz(value))
 
-#define NUM_COLORS 4 //Number of colors supported
-#define NUM_COLOR_BITS MIN_BITS_REQUIRED(NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)
+#define CHESSCAT_MAX_BOARD_SIZE 23 //Max board width or height
+
+#define CHESSCAT_NUM_COLORS 4 //Number of colors supported
+#define NUM_COLOR_BITS CHESSCAT_MIN_BITS_REQUIRED(CHESSCAT_NUM_COLORS - 1) //(Subtract 1 for 0-based numbering)
 /*
-Color layout:
+chesscat_EColor layout:
    B
 G     R
    W
 */
 
 
-#define STORE_MAX_MOVES 128 //Max number of moves to store before rewriting earlier moves
+#define CHESSCAT_STORE_MAX_MOVES 128 //Max number of moves to store before rewriting earlier moves
 
 typedef enum /* : uint8_t*/{
     Empty, //Colorless
@@ -26,45 +28,45 @@ typedef enum /* : uint8_t*/{
     Knight,
     Bishop
     //Duck //Colorless
-} PieceType;
+} chesscat_EPieceType;
 
 typedef enum/* : uint8_t*/{
     White,
     Black,
     Green,
     Red
-} Color;
+} chesscat_EColor;
 
 typedef struct {
     bool is_in_game;
     bool has_king_moved : 1;
     bool has_upper_rook_moved : 1;
     bool has_lower_rook_moved : 1;
-} ColorData;
+} _chesscat_ColorData;
 
 typedef struct {
-    PieceType type : 5;
-    Color color : NUM_COLOR_BITS;
+    chesscat_EPieceType type : 5;
+    chesscat_EColor color : NUM_COLOR_BITS;
     bool is_royal : 1;
-} Piece;
+} chesscat_Piece;
 
 typedef struct{
     int8_t row;
     int8_t col;
-} Square;
+} chesscat_Square;
 
 typedef struct{
-    Square from;
-    Square to;
-} Move;
+    chesscat_Square from;
+    chesscat_Square to;
+} chesscat_Move;
 
 typedef struct{
-    Move move;
-    PieceType promotion;
-} MovePromotion;
+    chesscat_Move move;
+    chesscat_EPieceType promotion;
+} chesscat_MovePromotion;
 
 typedef struct{
-    // --Game-breaking rules--
+    // --chesscat_Game-breaking rules--
     uint8_t board_width;
     uint8_t board_height;
 
@@ -80,7 +82,7 @@ typedef struct{
     bool allow_castle;
     bool allow_passant;
     //TODO: Pawn promotion options
-    //TODO: Royal Piece option
+    //TODO: Royal chesscat_Piece option
 
     // --Gamemodes--
     //bool giveaway_mode; //Give away all pieces to win
@@ -88,29 +90,29 @@ typedef struct{
     //bool has_duck; //🦆
     //bool atomic; //💥
 
-} GameRules;
+} chesscat_GameRules;
 
 typedef struct{
-    GameRules game_rules;
-    Color to_move : NUM_COLOR_BITS;
-    Square passantable_square; //Should be set to -1 -1 if no square is available
-    Square passant_target_square; //The pawn to be taken if en passant happens
-    ColorData color_data[NUM_COLORS]; //Whether the king or rooks have moved
-    uint8_t num_checks[NUM_COLORS]; //Number of times this color has been checked
-    Piece board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]; //0-based array of pieces in [row][col] order
-    Piece captured_pieces[MAX_BOARD_SIZE * MAX_BOARD_SIZE];
-} UniversalPosition;
+    chesscat_GameRules game_rules;
+    chesscat_EColor to_move : NUM_COLOR_BITS;
+    chesscat_Square passantable_square; //Should be set to -1 -1 if no square is available
+    chesscat_Square passant_target_square; //The pawn to be taken if en passant happens
+    _chesscat_ColorData color_data[CHESSCAT_NUM_COLORS]; //Whether the king or rooks have moved
+    uint8_t num_checks[CHESSCAT_NUM_COLORS]; //Number of times this color has been checked
+    chesscat_Piece board[CHESSCAT_MAX_BOARD_SIZE][CHESSCAT_MAX_BOARD_SIZE]; //0-based array of pieces in [row][col] order
+    chesscat_Piece captured_pieces[CHESSCAT_MAX_BOARD_SIZE * CHESSCAT_MAX_BOARD_SIZE];
+} chesscat_Position;
 
 typedef struct{
-    UniversalPosition position;
+    chesscat_Position position;
     uint16_t num_moves;
-    Move moves[STORE_MAX_MOVES];
+    chesscat_Move moves[CHESSCAT_STORE_MAX_MOVES];
     uint16_t num_promotions;
-    PieceType promotions[MAX_BOARD_SIZE * MAX_BOARD_SIZE]; //Pawn promotions
-} Game;
+    chesscat_EPieceType promotions[CHESSCAT_MAX_BOARD_SIZE * CHESSCAT_MAX_BOARD_SIZE]; //Pawn promotions
+} chesscat_Game;
 
 typedef enum{
     NotCastle,
     LowerCastle,
     UpperCastle    
-} MoveCastleType;
+} _chesscat_MoveCasleType;
