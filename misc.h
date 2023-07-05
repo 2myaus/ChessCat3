@@ -115,4 +115,11 @@ typedef enum{
     NotCastle,
     LowerCastle,
     UpperCastle    
-} _chesscat_MoveCasleType;
+} _chesscat_EMoveCasleType;
+
+typedef enum{
+    Normal,
+    Checked,
+    Stalemated,
+    Checkmated
+} chesscat_EColorState;

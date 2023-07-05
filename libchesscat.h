@@ -115,7 +115,14 @@ typedef enum{
     NotCastle,
     LowerCastle,
     UpperCastle    
-} _chesscat_MoveCasleType;
+} _chesscat_EMoveCasleType;
+
+typedef enum{
+    Normal,
+    Checked,
+    Stalemated,
+    Checkmated
+} chesscat_EColorState;
 
 /* main.c */
 bool _chesscat_same_squares(chesscat_Square s1, chesscat_Square s2);
@@ -133,17 +140,19 @@ chesscat_Square _chesscat_find_king(chesscat_Position *position, chesscat_EColor
 chesscat_Square _chesscat_find_lower_rook(chesscat_Position *position, chesscat_EColor color);
 chesscat_Square _chesscat_find_upper_rook(chesscat_Position *position, chesscat_EColor color);
 void _chesscat_set_next_to_play(chesscat_Position *position);
-_chesscat_MoveCasleType _chesscat_move_castles(chesscat_Position *position, chesscat_Move move);
+_chesscat_EMoveCasleType _chesscat_move_castles(chesscat_Position *position, chesscat_Move move);
 bool _chesscat_color_can_capture_piece(chesscat_Position *position, chesscat_EColor color, chesscat_Piece piece);
 void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], uint16_t *num_moves);
 uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_Square square, chesscat_Move moves_buf[]);
 uint16_t chesscat_get_all_possible_moves(chesscat_Position *position, chesscat_Move moves_buf[]);
+uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move moves_buf[]);
 bool _chesscat_can_royal_be_captured(chesscat_Position *position);
 void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move);
 void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 bool chesscat_moves_into_check(chesscat_Position *position, chesscat_Move move);
 bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType promotion);
 bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move);
+chesscat_EColorState chesscat_get_current_state(chesscat_Position *position);
 void chesscat_game_make_move(chesscat_Game *game, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 void _chesscat_set_default_rules(chesscat_GameRules *rules);
 void chesscat_set_default_game(chesscat_Game *game);

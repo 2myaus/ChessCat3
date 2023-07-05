@@ -251,7 +251,7 @@ void _chesscat_set_next_to_play(chesscat_Position *position)
     }
 }
 
-_chesscat_MoveCasleType _chesscat_move_castles(chesscat_Position *position, chesscat_Move move)
+_chesscat_EMoveCasleType _chesscat_move_castles(chesscat_Position *position, chesscat_Move move)
 {
     int8_t coldist = move.to.col - move.from.col;
     int8_t rowdist = move.to.row - move.from.row;
@@ -1072,7 +1072,7 @@ void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chessca
     position->passantable_square = none;
     if (piece.type == King)
     {
-        _chesscat_MoveCasleType castle_type = _chesscat_move_castles(position, move);
+        _chesscat_EMoveCasleType castle_type = _chesscat_move_castles(position, move);
         position->color_data[position->to_move].has_king_moved = true;
         if (castle_type == UpperCastle)
         {
@@ -1195,6 +1195,55 @@ bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move){
     }
 
     return false;
+}
+
+/*
+ * chesscat_get_all_legal_moves
+ * 
+ * Writes all legal moves for the current color to play to moves_buf
+ */
+uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move moves_buf[]){
+    chesscat_Move moves[chesscat_get_all_possible_moves(position, NULL)]; //TODO: Make this more efficient
+    uint16_t num_possible_moves = chesscat_get_all_possible_moves(position, moves);
+    uint16_t num_legal_moves = 0;
+    for(uint16_t i = 0; i < num_possible_moves; i++){
+        if(chesscat_is_move_legal(position, moves[i], Queen)){
+            if(moves_buf != NULL){
+                moves_buf[num_legal_moves] = moves[i];
+            }
+            num_legal_moves++;
+        }
+    }
+    return num_legal_moves;
+}
+
+chesscat_EColorState chesscat_get_current_state(chesscat_Position *position){
+    bool isCheck = false;
+    if(!_chesscat_position_ignores_checks(position)){
+        chesscat_Position pos_copy = *position;
+
+        _chesscat_set_next_to_play(&pos_copy);
+
+        if(_chesscat_can_royal_be_captured(&pos_copy)){
+            isCheck = true;
+        }
+    }
+
+    chesscat_Move moves[chesscat_get_all_legal_moves(position, NULL)];
+    uint16_t num_legal_moves = chesscat_get_all_legal_moves(position, moves); //TODO: Make this more efficient
+
+    bool noLegalMoves = (num_legal_moves == 0);
+
+    if(noLegalMoves && isCheck){
+        return Checkmated;
+    }
+    if(noLegalMoves){
+        return Stalemated;
+    }
+    if(isCheck){
+        return Checked;
+    }
+    return Normal;
 }
 
 /*   chesscat_Game utility functions   */
