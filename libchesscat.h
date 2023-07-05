@@ -122,7 +122,7 @@ typedef enum{
     Checked,
     Stalemated,
     Checkmated
-} chesscat_EColorState;
+} chesscat_EPositionState;
 
 /* main.c */
 bool _chesscat_same_squares(chesscat_Square s1, chesscat_Square s2);
@@ -152,7 +152,7 @@ void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chessca
 bool chesscat_moves_into_check(chesscat_Position *position, chesscat_Move move);
 bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType promotion);
 bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move);
-chesscat_EColorState chesscat_get_current_state(chesscat_Position *position);
+chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position);
 void chesscat_game_make_move(chesscat_Game *game, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 void _chesscat_set_default_rules(chesscat_GameRules *rules);
 void chesscat_set_default_game(chesscat_Game *game);

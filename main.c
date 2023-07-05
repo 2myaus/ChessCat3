@@ -1217,7 +1217,7 @@ uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move
     return num_legal_moves;
 }
 
-chesscat_EColorState chesscat_get_current_state(chesscat_Position *position){
+chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position){
     bool isCheck = false;
     if(!_chesscat_position_ignores_checks(position)){
         chesscat_Position pos_copy = *position;
@@ -1409,6 +1409,7 @@ chesscat_Square chesscat_get_square_from_string(char *str)
 
 chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position, char *str)
 {
+    //TODO: Accept castle moves and # and + at the end of the move string
     chesscat_Square none = {.row = -1, .col = -1};
     chesscat_MovePromotion move_p;
     move_p.move.to = none;

@@ -95,6 +95,18 @@ int main(/*int argc, char* argv[]*/)
         {
             chesscat_make_move(&g.position, next.move, next.promotion);
             PrintPosition(&g);
+            chesscat_EPositionState currentState = chesscat_get_current_state(&(g.position));
+            if(currentState == Checkmated){
+                printf("Mate!\n");
+                return 0;
+            }
+            else if(currentState == Stalemated){
+                printf("Stalemate!\n");
+                return 0;
+            }
+            else if(currentState == Checked){
+                printf("Check!\n");
+            }
         }
         else if (movestrbuf[0] == '\n')
         {

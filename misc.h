@@ -122,4 +122,4 @@ typedef enum{
     Checked,
     Stalemated,
     Checkmated
-} chesscat_EColorState;
+} chesscat_EPositionState;
