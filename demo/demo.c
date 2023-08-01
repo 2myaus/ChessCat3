@@ -75,10 +75,10 @@ void PrintPosition(chesscat_Game *game)
 
 int main(/*int argc, char* argv[]*/)
 {
-    printf("chesscat_Piece size: %lu\n", sizeof(chesscat_Piece));
-    printf("chesscat_Game size: %lu\n", sizeof(chesscat_Game));
-    printf("chesscat_Square size: %lu\n", sizeof(chesscat_Square));
-    printf("chesscat_Move size: %lu\n", sizeof(chesscat_Move));
+    printf("chesscat_Piece size: %llu\n", sizeof(chesscat_Piece));
+    printf("chesscat_Game size: %llu\n", sizeof(chesscat_Game));
+    printf("chesscat_Square size: %llu\n", sizeof(chesscat_Square));
+    printf("chesscat_Move size: %llu\n", sizeof(chesscat_Move));
 
     chesscat_Game g;
     chesscat_set_default_game(&g);

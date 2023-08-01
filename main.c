@@ -295,8 +295,6 @@ void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], u
 uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_Square square, chesscat_Move moves_buf[])
 {
 
-    //TODO: Fix kangaroo pawns
-
     bool moves_like_bishop = false;
     bool moves_like_rook = false;
     bool moves_like_knight = false;
@@ -337,6 +335,8 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
         break;
     }
 
+
+    //TODO: Swap these over to use _chesscat_add_move_to_buf()
     if (moves_like_king)
     {
         for (int8_t rowto = square.row - 1; rowto <= square.row + 1; rowto++)
@@ -843,6 +843,27 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     moves_buf[num_moves].to = advance_square;
                 }
                 num_moves++;
+                if (/*position->game_rules.torpedo_pawns ||*/
+                    (piece.color == White && square.row <= 1) ||
+                    (piece.color == Black && square.row >= position->game_rules.board_height - 2) ||
+                    (piece.color == Green && square.col >= 1) ||
+                    (piece.color == Red && square.col >= position->game_rules.board_width - 2))
+                {
+                    chesscat_Square double_advance_square = {.row = square.row + row_dist * 2, .col = square.col + col_dist * 2};
+                    if (chesscat_square_in_bounds(position, double_advance_square))
+                    {
+                        chesscat_Piece double_advance_piece = chesscat_get_piece_at_square(position, double_advance_square);
+                        if (double_advance_piece.type == Empty)
+                        {
+                            if (moves_buf != NULL)
+                            {
+                                moves_buf[num_moves].from = square;
+                                moves_buf[num_moves].to = double_advance_square;
+                            }
+                            num_moves++;
+                        }
+                    }
+                }
             }
             if (chesscat_square_in_bounds(position, take_left_square))
             {
@@ -886,28 +907,6 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                         moves_buf[num_moves].to = take_right_square;
                     }
                     num_moves++;
-                }
-            }
-
-            if (/*position->game_rules.torpedo_pawns ||*/
-                (piece.color == White && square.row <= 1) ||
-                (piece.color == Black && square.row >= position->game_rules.board_height - 2) ||
-                (piece.color == Green && square.col >= 1) ||
-                (piece.color == Red && square.col >= position->game_rules.board_width - 2))
-            {
-                chesscat_Square double_advance_square = {.row = square.row + row_dist * 2, .col = square.col + col_dist * 2};
-                if (chesscat_square_in_bounds(position, double_advance_square))
-                {
-                    chesscat_Piece double_advance_piece = chesscat_get_piece_at_square(position, double_advance_square);
-                    if (double_advance_piece.type == Empty)
-                    {
-                        if (moves_buf != NULL)
-                        {
-                            moves_buf[num_moves].from = square;
-                            moves_buf[num_moves].to = double_advance_square;
-                        }
-                        num_moves++;
-                    }
                 }
             }
 
