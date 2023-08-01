@@ -85,13 +85,15 @@ int main(/*int argc, char* argv[]*/)
 
     PrintPosition(&g);
 
+    printf("Ignores checks: %d\n", _chesscat_position_ignores_checks(&g.position));
+
     while (true)
     {
         char movestrbuf[16];
         fgets(movestrbuf, 9, stdin);
         movestrbuf[strlen(movestrbuf) - 1] = '\0'; // Remove newline
         chesscat_MovePromotion next = chesscat_get_move_from_string(&g.position, movestrbuf);
-        if (chesscat_is_valid_move(next.move))
+        if (chesscat_is_valid_move(next.move) && chesscat_is_move_legal(&g.position, next.move, next.promotion))
         {
             chesscat_make_move(&g.position, next.move, next.promotion);
             PrintPosition(&g);

@@ -294,6 +294,9 @@ void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], u
 
 uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_Square square, chesscat_Move moves_buf[])
 {
+
+    //TODO: Fix kangaroo pawns
+
     bool moves_like_bishop = false;
     bool moves_like_rook = false;
     bool moves_like_knight = false;
@@ -367,6 +370,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
         }
         if (position->game_rules.allow_castle && piece.type == King && piece.is_royal && !position->color_data[piece.color].has_king_moved)
         {
+            //NOTE: Maybe make this its own function?
             if (!position->color_data[piece.color].has_lower_rook_moved)
             {
                 chesscat_Square lower_rook = _chesscat_find_lower_rook(position, piece.color);
@@ -436,7 +440,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                         }
                         if (!is_blocked)
                         {
-                            chesscat_Square tosquare = {.col = square.col - 2, .row = square.row};
+                            chesscat_Square tosquare = {.col = square.col + 2, .row = square.row};
 
                             chesscat_Move move = {.from = square, .to = tosquare};
                             _chesscat_add_move_to_buf(move, &moves_buf, &num_moves);
@@ -456,7 +460,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                         }
                         if (!is_blocked)
                         {
-                            chesscat_Square tosquare = {.col = square.col, .row = square.row - 2};
+                            chesscat_Square tosquare = {.col = square.col, .row = square.row + 2};
 
                             chesscat_Move move = {.from = square, .to = tosquare};
                             _chesscat_add_move_to_buf(move, &moves_buf, &num_moves);
@@ -1180,7 +1184,29 @@ bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, che
             return false;
         }
     }
-    // TODO: Check if castle is possible
+    if(_chesscat_move_castles(position, move) != NotCastle){ //WIP
+        //TODO: Check if the current position is check
+        //NOTE: Maybe make this its own function?
+        chesscat_Square castle_step_square = move.from;
+        int8_t col_dif = move.to.col - move.from.col;
+        int8_t row_dif = move.to.row - move.from.row;
+        if(col_dif < 0){
+            castle_step_square.col--;
+        }
+        else if(col_dif > 0){
+            castle_step_square.col++;
+        }
+        else if(row_dif < 0){
+            castle_step_square.row--;
+        }
+        else if(row_dif > 0){
+            castle_step_square.row++;
+        }
+        chesscat_Move castle_step_move = {.from = move.from, .to = castle_step_square};
+        if(!chesscat_is_move_legal(position, castle_step_move, Queen)){
+            return false;
+        }
+    }
     return true;
 }
 
@@ -1263,8 +1289,6 @@ void _chesscat_set_default_rules(chesscat_GameRules *rules)
     rules->board_height = 8;
     rules->board_width = 8;
     rules->ignore_checks = false;
-    rules->allow_castle = true;
-    rules->allow_passant = true;
 }
 
 void chesscat_set_default_game(chesscat_Game *game)
@@ -1327,6 +1351,9 @@ void chesscat_set_default_game(chesscat_Game *game)
     game->position.color_data[Black].has_king_moved = false;
     game->position.color_data[Black].has_lower_rook_moved = false;
     game->position.color_data[Black].has_upper_rook_moved = false;
+
+    game->position.color_data[Red].is_in_game = false;
+    game->position.color_data[Green].is_in_game = false;
 }
 
 /*   Input   */
