@@ -1142,6 +1142,20 @@ void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chessca
     _chesscat_set_next_to_play(position);
 }
 
+bool chesscat_is_position_check(chesscat_Position *position){
+    bool isCheck = false;
+    if(!_chesscat_position_ignores_checks(position)){
+        chesscat_Position pos_copy = *position;
+
+        _chesscat_set_next_to_play(&pos_copy);
+
+        if(_chesscat_can_royal_be_captured(&pos_copy)){
+            isCheck = true;
+        }
+    }
+    return isCheck;
+}
+
 /*
  * chesscat_moves_into_check
  * 
@@ -1183,8 +1197,10 @@ bool chesscat_is_move_legal(chesscat_Position *position, chesscat_Move move, che
             return false;
         }
     }
-    if(_chesscat_move_castles(position, move) != NotCastle){ //WIP
-        //TODO: Check if the current position is check
+    if(_chesscat_move_castles(position, move) != NotCastle){
+        if(chesscat_is_position_check(position)){
+            return false;
+        }
         //NOTE: Maybe make this its own function?
         chesscat_Square castle_step_square = move.from;
         int8_t col_dif = move.to.col - move.from.col;
@@ -1243,16 +1259,7 @@ uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move
 }
 
 chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position){
-    bool isCheck = false;
-    if(!_chesscat_position_ignores_checks(position)){
-        chesscat_Position pos_copy = *position;
-
-        _chesscat_set_next_to_play(&pos_copy);
-
-        if(_chesscat_can_royal_be_captured(&pos_copy)){
-            isCheck = true;
-        }
-    }
+    bool isCheck = chesscat_is_position_check(position);
 
     chesscat_Move moves[chesscat_get_all_legal_moves(position, NULL)];
     uint16_t num_legal_moves = chesscat_get_all_legal_moves(position, moves); //TODO: Make this more efficient
