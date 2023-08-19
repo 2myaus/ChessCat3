@@ -46,6 +46,7 @@
         "typeinfo": "c",
         "utility": "c",
         "valarray": "c",
-        "variant": "c"
+        "variant": "c",
+        "misc.h": "c"
     }
 }

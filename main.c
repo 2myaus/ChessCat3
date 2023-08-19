@@ -34,7 +34,7 @@ bool chesscat_is_valid_move(chesscat_Move m)
 
 /*
  * chesscat_square_in_bounds
- * 
+ *
  * Checks if a square is within the boundaries of the given position
  */
 bool chesscat_square_in_bounds(chesscat_Position *position, chesscat_Square square)
@@ -288,7 +288,7 @@ void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], u
 
 /*
  * chesscat_get_all_possible_moves
- * 
+ *
  * Writes all possible (not necessarily legal) moves from the given square for the current color to play to moves_buf
  */
 
@@ -909,8 +909,6 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     num_moves++;
                 }
             }
-
-            // TODO: Add promotion
         }
         /*
         if(position->game_rules.sideways_pawns){
@@ -940,7 +938,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
 
 /*
  * chesscat_get_all_possible_moves
- * 
+ *
  * Writes all possible (not necessarily legal) moves for the current color to play to moves_buf
  */
 uint16_t chesscat_get_all_possible_moves(chesscat_Position *position, chesscat_Move moves_buf[])
@@ -980,7 +978,7 @@ bool _chesscat_can_royal_be_captured(chesscat_Position *position)
 
 /*
  * chesscat_move_pieces
- * 
+ *
  * Sets the new positions of pieces according to a move, including captures, castles, and en passants
  * Does not set other positional data such as the color to play or pieces captured
  */
@@ -1062,7 +1060,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
 
 /*
  * chesscat_make_move
- * 
+ *
  * Plays a move in the given position, setting all positional data as required
  */
 void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType pawn_promotion)
@@ -1158,7 +1156,7 @@ bool chesscat_is_position_check(chesscat_Position *position){
 
 /*
  * chesscat_moves_into_check
- * 
+ *
  * Returns whether the given move moves into check in the given position
  */
 bool chesscat_moves_into_check(chesscat_Position *position, chesscat_Move move)
@@ -1177,7 +1175,7 @@ bool chesscat_moves_into_check(chesscat_Position *position, chesscat_Move move)
 
 /*
  * chesscat_is_move_legal
- * 
+ *
  * Returns whether the given move is legal in the given position
  * Does not check if a move is actually *possible* - assumes it is
  */
@@ -1240,7 +1238,7 @@ bool chesscat_is_move_possible(chesscat_Position *position, chesscat_Move move){
 
 /*
  * chesscat_get_all_legal_moves
- * 
+ *
  * Writes all legal moves for the current color to play to moves_buf
  */
 uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move moves_buf[]){
@@ -1710,7 +1708,7 @@ len_2:
             goto pawn_validate;
         }
         //At this point the order must be piece-col-row
-        
+
         strncpy(square_copy, str + 1, 2);
         square_copy[2] = '\0';
         move_p.move.from = chesscat_get_square_from_string(square_copy);
