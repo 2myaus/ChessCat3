@@ -1256,6 +1256,21 @@ uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move
     return num_legal_moves;
 }
 
+uint16_t chesscat_get_legal_moves_from(chesscat_Position *position, chesscat_Square from, chesscat_Move moves_buf[]){
+    chesscat_Move moves[chesscat_get_possible_moves_from(position, from, NULL)]; //TODO: Make this more efficient
+    uint16_t num_possible_moves = chesscat_get_possible_moves_from(position, from, moves);
+    uint16_t num_legal_moves = 0;
+    for(uint16_t i = 0; i < num_possible_moves; i++){
+        if(chesscat_is_move_legal(position, moves[i], Queen)){
+            if(moves_buf != NULL){
+                moves_buf[num_legal_moves] = moves[i];
+            }
+            num_legal_moves++;
+        }
+    }
+    return num_legal_moves;
+}
+
 chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position){
     bool isCheck = chesscat_is_position_check(position);
 

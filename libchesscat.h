@@ -146,6 +146,7 @@ void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], u
 uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_Square square, chesscat_Move moves_buf[]);
 uint16_t chesscat_get_all_possible_moves(chesscat_Position *position, chesscat_Move moves_buf[]);
 uint16_t chesscat_get_all_legal_moves(chesscat_Position *position, chesscat_Move moves_buf[]);
+uint16_t chesscat_get_legal_moves_from(chesscat_Position *position, chesscat_Square square, chesscat_Move moves_buf[]);
 bool _chesscat_can_royal_be_captured(chesscat_Position *position);
 void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move);
 void chesscat_make_move(chesscat_Position *position, chesscat_Move move, chesscat_EPieceType pawn_promotion);
