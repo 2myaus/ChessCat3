@@ -66,7 +66,7 @@ typedef struct{
 } chesscat_MovePromotion;
 
 typedef struct{
-    // --chesscat_Game-breaking rules--
+    // Game-breaking rules--
     uint8_t board_width;
     uint8_t board_height;
 
@@ -114,7 +114,7 @@ typedef struct{
 typedef enum{
     NotCastle,
     LowerCastle,
-    UpperCastle    
+    UpperCastle
 } _chesscat_EMoveCasleType;
 
 typedef enum{

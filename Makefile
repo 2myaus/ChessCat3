@@ -9,9 +9,9 @@ ARFLAGS = rcs
 LIBNAME = libchesscat.a
 
 EMCC = emcc
-WASM_CFLAGS = -Wall -Wextra -fshort-enums --no-entry
+WASM_CFLAGS = -Wall -Wextra -fshort-enums -c --no-entry
 
-WASM_FILENAME = main.wasm
+WASM_FILENAME = main.o
 
 EMAR = emar
 WASM_ARFLAGS = rcs
