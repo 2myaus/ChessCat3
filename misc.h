@@ -100,7 +100,7 @@ typedef struct{
     _chesscat_ColorData color_data[CHESSCAT_NUM_COLORS]; //Whether the king or rooks have moved
     uint8_t num_checks[CHESSCAT_NUM_COLORS]; //Number of times this color has been checked
     chesscat_Piece board[CHESSCAT_MAX_BOARD_SIZE][CHESSCAT_MAX_BOARD_SIZE]; //0-based array of pieces in [row][col] order
-    chesscat_Piece captured_pieces[CHESSCAT_MAX_BOARD_SIZE * CHESSCAT_MAX_BOARD_SIZE];
+    //chesscat_Piece captured_pieces[CHESSCAT_MAX_BOARD_SIZE * CHESSCAT_MAX_BOARD_SIZE];
 } chesscat_Position;
 
 typedef struct{
@@ -114,7 +114,7 @@ typedef struct{
 typedef enum{
     NotCastle,
     LowerCastle,
-    UpperCastle    
+    UpperCastle
 } _chesscat_EMoveCasleType;
 
 typedef enum{
