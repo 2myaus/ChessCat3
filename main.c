@@ -1373,6 +1373,8 @@ void chesscat_set_default_game(chesscat_Game *game)
 
     game->position.color_data[Red].is_in_game = false;
     game->position.color_data[Green].is_in_game = false;
+
+    game->position.to_move = White;
 }
 
 /*   Input   */
