@@ -1776,7 +1776,7 @@ void chesscat_set_default_game(chesscat_Game *game)
 
 uint8_t chesscat_set_game_to_FEN(chesscat_Game *game, char* FEN){
 
-    _chesscat_set_default_rules(&(game->position.game_rules));
+    chesscat_set_default_game(game);
 
     game->position.game_rules.board_height = 1; //Will be redetermined by parsing
     game->position.game_rules.board_width = 1;
@@ -1891,7 +1891,13 @@ uint8_t chesscat_set_game_to_FEN(chesscat_Game *game, char* FEN){
     }
 
     if(FEN[charpos] != '-'){
-        chesscat_Square passant_square = chesscat_get_square_from_string(FEN + charpos);
+        char passant_string[4];
+        strncpy(passant_string, FEN + charpos, 3);
+        passant_string[3] = '\0';
+        if(passant_string[2] == ' '){
+            passant_string[2] = '\0';
+        }
+        chesscat_Square passant_square = chesscat_get_square_from_string(passant_string);
         if(!chesscat_is_valid_square(passant_square)){
             goto fen_error;
         }
