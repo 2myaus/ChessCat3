@@ -157,6 +157,7 @@ chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position);
 void chesscat_game_make_move(chesscat_Game *game, chesscat_Move move, chesscat_EPieceType pawn_promotion);
 void _chesscat_set_default_rules(chesscat_GameRules *rules);
 void chesscat_set_default_game(chesscat_Game *game);
+int chesscat_set_game_to_FEN(chesscat_Game *game, char* FEN);
 chesscat_Piece chesscat_get_piece_from_char(char c);
 chesscat_Square chesscat_get_square_from_string(char *str);
 chesscat_MovePromotion chesscat_get_move_from_string(chesscat_Position *position, char *str);

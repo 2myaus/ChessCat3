@@ -1299,84 +1299,6 @@ void chesscat_game_make_move(chesscat_Game *game, chesscat_Move move, chesscat_E
     // TODO: chesscat_Move Logging (including pawn promotion log)
 }
 
-/*   chesscat_Game creation functions   */
-
-void _chesscat_set_default_rules(chesscat_GameRules *rules)
-{
-    rules->allow_castle = true;
-    rules->allow_passant = true;
-    rules->board_height = 8;
-    rules->board_width = 8;
-    rules->ignore_checks = false;
-}
-
-void chesscat_set_default_game(chesscat_Game *game)
-{
-    chesscat_Piece wPawn = {.color = White, .is_royal = false, .type = Pawn};
-    chesscat_Piece wKing = {.color = White, .is_royal = true, .type = King};
-    chesscat_Piece wQueen = {.color = White, .is_royal = false, .type = Queen};
-    chesscat_Piece wRook = {.color = White, .is_royal = false, .type = Rook};
-    chesscat_Piece wKnight = {.color = White, .is_royal = false, .type = Knight};
-    chesscat_Piece wBishop = {.color = White, .is_royal = false, .type = Bishop};
-
-    chesscat_Piece bPawn = {.color = Black, .is_royal = false, .type = Pawn};
-    chesscat_Piece bKing = {.color = Black, .is_royal = true, .type = King};
-    chesscat_Piece bQueen = {.color = Black, .is_royal = false, .type = Queen};
-    chesscat_Piece bRook = {.color = Black, .is_royal = false, .type = Rook};
-    chesscat_Piece bKnight = {.color = Black, .is_royal = false, .type = Knight};
-    chesscat_Piece bBishop = {.color = Black, .is_royal = false, .type = Bishop};
-    chesscat_Piece empty = {.color = White, .is_royal = false, .type = Empty};
-
-    _chesscat_set_default_rules(&(game->position.game_rules));
-    for (uint8_t col = 0; col <= 7; col++)
-    {
-        _chesscat_set_piece(&(game->position), 1, col, wPawn);
-        _chesscat_set_piece(&(game->position), 6, col, bPawn);
-        _chesscat_set_piece(&(game->position), 2, col, empty);
-        _chesscat_set_piece(&(game->position), 3, col, empty);
-        _chesscat_set_piece(&(game->position), 4, col, empty);
-        _chesscat_set_piece(&(game->position), 5, col, empty);
-    }
-
-    _chesscat_set_piece(&(game->position), 0, 0, wRook);
-    _chesscat_set_piece(&(game->position), 0, 1, wKnight);
-    _chesscat_set_piece(&(game->position), 0, 2, wBishop);
-    _chesscat_set_piece(&(game->position), 0, 3, wQueen);
-    _chesscat_set_piece(&(game->position), 0, 4, wKing);
-    _chesscat_set_piece(&(game->position), 0, 5, wBishop);
-    _chesscat_set_piece(&(game->position), 0, 6, wKnight);
-    _chesscat_set_piece(&(game->position), 0, 7, wRook);
-
-    _chesscat_set_piece(&(game->position), 7, 0, bRook);
-    _chesscat_set_piece(&(game->position), 7, 1, bKnight);
-    _chesscat_set_piece(&(game->position), 7, 2, bBishop);
-    _chesscat_set_piece(&(game->position), 7, 3, bQueen);
-    _chesscat_set_piece(&(game->position), 7, 4, bKing);
-    _chesscat_set_piece(&(game->position), 7, 5, bBishop);
-    _chesscat_set_piece(&(game->position), 7, 6, bKnight);
-    _chesscat_set_piece(&(game->position), 7, 7, bRook);
-
-    game->position.num_checks[White] = 0;
-    game->position.num_checks[Black] = 0;
-
-    chesscat_Square none = {.row = -1, .col = -1};
-    game->position.passantable_square = none;
-    game->position.color_data[White].is_in_game = true;
-    game->position.color_data[White].has_king_moved = false;
-    game->position.color_data[White].has_lower_rook_moved = false;
-    game->position.color_data[White].has_upper_rook_moved = false;
-
-    game->position.color_data[Black].is_in_game = true;
-    game->position.color_data[Black].has_king_moved = false;
-    game->position.color_data[Black].has_lower_rook_moved = false;
-    game->position.color_data[Black].has_upper_rook_moved = false;
-
-    game->position.color_data[Red].is_in_game = false;
-    game->position.color_data[Green].is_in_game = false;
-
-    game->position.to_move = White;
-}
-
 /*   Input   */
 
 chesscat_Piece chesscat_get_piece_from_char(char c)
@@ -1765,4 +1687,237 @@ pawn_validate:
         move_p_final = move_p;
     }
     return move_p_final;
+}
+
+
+/*   chesscat_Game creation functions   */
+
+void _chesscat_set_default_rules(chesscat_GameRules *rules)
+{
+    rules->allow_castle = true;
+    rules->allow_passant = true;
+    rules->board_height = 8;
+    rules->board_width = 8;
+    rules->ignore_checks = false;
+}
+
+void chesscat_set_default_game(chesscat_Game *game)
+{
+    chesscat_Piece wPawn = {.color = White, .is_royal = false, .type = Pawn};
+    chesscat_Piece wKing = {.color = White, .is_royal = true, .type = King};
+    chesscat_Piece wQueen = {.color = White, .is_royal = false, .type = Queen};
+    chesscat_Piece wRook = {.color = White, .is_royal = false, .type = Rook};
+    chesscat_Piece wKnight = {.color = White, .is_royal = false, .type = Knight};
+    chesscat_Piece wBishop = {.color = White, .is_royal = false, .type = Bishop};
+
+    chesscat_Piece bPawn = {.color = Black, .is_royal = false, .type = Pawn};
+    chesscat_Piece bKing = {.color = Black, .is_royal = true, .type = King};
+    chesscat_Piece bQueen = {.color = Black, .is_royal = false, .type = Queen};
+    chesscat_Piece bRook = {.color = Black, .is_royal = false, .type = Rook};
+    chesscat_Piece bKnight = {.color = Black, .is_royal = false, .type = Knight};
+    chesscat_Piece bBishop = {.color = Black, .is_royal = false, .type = Bishop};
+    chesscat_Piece empty = {.color = White, .is_royal = false, .type = Empty};
+
+    _chesscat_set_default_rules(&(game->position.game_rules));
+    for (uint8_t col = 0; col <= 7; col++)
+    {
+        _chesscat_set_piece(&(game->position), 1, col, wPawn);
+        _chesscat_set_piece(&(game->position), 6, col, bPawn);
+        _chesscat_set_piece(&(game->position), 2, col, empty);
+        _chesscat_set_piece(&(game->position), 3, col, empty);
+        _chesscat_set_piece(&(game->position), 4, col, empty);
+        _chesscat_set_piece(&(game->position), 5, col, empty);
+    }
+
+    _chesscat_set_piece(&(game->position), 0, 0, wRook);
+    _chesscat_set_piece(&(game->position), 0, 1, wKnight);
+    _chesscat_set_piece(&(game->position), 0, 2, wBishop);
+    _chesscat_set_piece(&(game->position), 0, 3, wQueen);
+    _chesscat_set_piece(&(game->position), 0, 4, wKing);
+    _chesscat_set_piece(&(game->position), 0, 5, wBishop);
+    _chesscat_set_piece(&(game->position), 0, 6, wKnight);
+    _chesscat_set_piece(&(game->position), 0, 7, wRook);
+
+    _chesscat_set_piece(&(game->position), 7, 0, bRook);
+    _chesscat_set_piece(&(game->position), 7, 1, bKnight);
+    _chesscat_set_piece(&(game->position), 7, 2, bBishop);
+    _chesscat_set_piece(&(game->position), 7, 3, bQueen);
+    _chesscat_set_piece(&(game->position), 7, 4, bKing);
+    _chesscat_set_piece(&(game->position), 7, 5, bBishop);
+    _chesscat_set_piece(&(game->position), 7, 6, bKnight);
+    _chesscat_set_piece(&(game->position), 7, 7, bRook);
+
+    game->position.num_checks[White] = 0;
+    game->position.num_checks[Black] = 0;
+
+    chesscat_Square none = {.row = -1, .col = -1};
+    game->position.passantable_square = none;
+    game->position.color_data[White].is_in_game = true;
+    game->position.color_data[White].has_king_moved = false;
+    game->position.color_data[White].has_lower_rook_moved = false;
+    game->position.color_data[White].has_upper_rook_moved = false;
+
+    game->position.color_data[Black].is_in_game = true;
+    game->position.color_data[Black].has_king_moved = false;
+    game->position.color_data[Black].has_lower_rook_moved = false;
+    game->position.color_data[Black].has_upper_rook_moved = false;
+
+    game->position.color_data[Red].is_in_game = false;
+    game->position.color_data[Green].is_in_game = false;
+
+    game->position.to_move = White;
+}
+
+/*
+ * chesscat_set_game_to_FEN
+ *
+ * Sets a game to a position based on a FEN string. Returns 0 on success
+ */
+
+uint8_t chesscat_set_game_to_FEN(chesscat_Game *game, char* FEN){
+
+    _chesscat_set_default_rules(&(game->position.game_rules));
+
+    game->position.game_rules.board_height = 1; //Will be redetermined by parsing
+    game->position.game_rules.board_width = 1;
+
+    uint16_t charpos = 0;
+    while(FEN[charpos] == ' '){ //Ignore leading spaces
+        charpos++;
+    }
+
+    chesscat_Piece flipped_board[CHESSCAT_MAX_BOARD_SIZE][CHESSCAT_MAX_BOARD_SIZE];
+
+    uint8_t rowpos = 0;
+    uint8_t colpos = 0;
+    while(FEN[charpos] != ' ' && FEN[charpos] != '\0'){ //Parse slash-separated rows
+        char currentchar = FEN[charpos];
+        charpos++;
+
+        chesscat_Piece charpiece = chesscat_get_piece_from_char(currentchar);
+        if(charpiece.type != Empty){
+            flipped_board[rowpos][colpos] = charpiece;
+            colpos++;
+            continue;
+        }
+        if(currentchar == '/'){
+            if(colpos > game->position.game_rules.board_width){
+                if(rowpos != 0){
+                    goto oob_error; //Rows don't match up in width
+                }
+                game->position.game_rules.board_width = colpos;
+            }
+            game->position.game_rules.board_height++;
+            rowpos++;
+            colpos = 0;
+            continue;
+        }
+        uint8_t charnum = currentchar - '0';
+        if(charnum <= 9){ //If the char is a number
+            uint8_t emptyrows = charnum;
+            uint8_t nextcharnum = FEN[charpos] - '0'; //charpos incremented earlier so this is the next char
+            if(nextcharnum <= 9){ //If next char is a number too
+                emptyrows *= 10;
+                emptyrows += nextcharnum;
+            }
+            for(uint8_t i = 0; i < emptyrows; i++){
+                chesscat_Piece empty_piece = {.color = White, .is_royal = false, .type = Empty};
+                flipped_board[rowpos][colpos] = empty_piece;
+                colpos++;
+            }
+            continue;
+        }
+        goto fen_error; //Char doesn't match any valid char at this point
+    }
+    uint8_t real_row = 0;
+    for(int16_t rowpos = game->position.game_rules.board_height - 1; rowpos >= 0; rowpos--){
+        for(uint8_t colpos = 0; colpos < game->position.game_rules.board_width; colpos++){
+            _chesscat_set_piece(&(game->position), real_row, colpos, flipped_board[rowpos][colpos]);
+        }
+        real_row++;
+    }
+
+    while(FEN[charpos] == ' '){ //Ignore whitespace
+        charpos++;
+    }
+
+    if(FEN[charpos] == '\0'){
+        //Incomplete FEN, return default state
+        return 0;
+    }
+
+    if(FEN[charpos] == 'b'){
+        game->position.to_move = Black;
+    }
+    charpos++;
+
+    while(FEN[charpos] == ' '){ //Ignore whitespace
+        charpos++;
+    }
+
+    if(FEN[charpos] != '-'){
+        game->position.color_data[White].has_lower_rook_moved = true;
+        game->position.color_data[White].has_upper_rook_moved = true;
+
+        game->position.color_data[Black].has_lower_rook_moved = true;
+        game->position.color_data[Black].has_upper_rook_moved = true;
+
+        while(FEN[charpos] != ' ' && FEN[charpos] != '\0'){
+            char currentchar = FEN[charpos];
+            if(currentchar == 'K'){
+                game->position.color_data[White].has_upper_rook_moved = false;
+            }
+            else if(currentchar == 'k'){
+                game->position.color_data[Black].has_upper_rook_moved = false;
+            }
+            else if(currentchar == 'Q'){
+                game->position.color_data[White].has_lower_rook_moved = false;
+            }
+            else if(currentchar == 'q'){
+                game->position.color_data[Black].has_lower_rook_moved = false;
+            }
+            else{
+                goto fen_error;
+            }
+            charpos++;
+        }
+    }
+    else{
+        charpos++;
+    }
+
+    while(FEN[charpos] == ' '){ //Ignore whitespace
+        charpos++;
+    }
+
+    if(FEN[charpos] != '-'){
+        chesscat_Square passant_square = chesscat_get_square_from_string(FEN + charpos);
+        if(!chesscat_is_valid_square(passant_square)){
+            goto fen_error;
+        }
+        game->position.passantable_square = passant_square;
+        game->position.passant_target_square = passant_square;
+        if(game->position.to_move == White){
+            game->position.passant_target_square.row++;
+        }
+        else{
+            game->position.passant_target_square.row--;
+        }
+        while(FEN[charpos] != ' '){ //Ignore whitespace
+            charpos++;
+        }
+    }
+    else{
+        charpos++;
+    }
+
+    //TODO: 50-move rule counter
+
+    return 0;
+
+
+fen_error:
+    return 1;
+oob_error:
+    return 2;
 }
