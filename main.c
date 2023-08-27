@@ -315,7 +315,17 @@ _chesscat_EMoveCasleType _chesscat_move_castles(chesscat_Position *position, che
 bool _chesscat_color_can_capture_piece(chesscat_Position *position, chesscat_EColor color, chesscat_Piece piece)
 {
     // NOTE: Position is used here because gamerules may change what colors can be captured
-    return (piece.type == Empty || piece.color != color);
+    if(piece.type != Empty){
+        if(piece.color == color){
+            if(!(position->game_rules.capture_own)){
+                return false;
+            }
+            if(piece.type == King){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void _chesscat_add_move_to_buf(chesscat_Move move, chesscat_Move *moves_buf[], uint16_t *num_moves)
@@ -1009,7 +1019,8 @@ bool _chesscat_can_royal_be_captured(chesscat_Position *position)
     for (uint16_t i = 0; i < num_moves; i++)
     {
         chesscat_Move move = moves[i];
-        if (chesscat_get_piece_at_square(position, move.to).is_royal)
+        chesscat_Piece piece = chesscat_get_piece_at_square(position, move.to);
+        if (piece.is_royal && piece.color != position->to_move)
         {
             return true;
         }

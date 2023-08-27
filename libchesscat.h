@@ -72,7 +72,7 @@ typedef struct{
 
     // --Misc rules--
     bool ignore_checks; //Capture king to win instead of checkmating. Disables check.
-    //bool capture_own; //Able to capture your own pieces
+    bool capture_own; //Able to capture your own pieces
     //bool sideways_pawns; //Pawns can move sideways
     //bool backwards_pawns; //Pawns can move backwards
     //bool torpedo_pawns; //Pawns can always move 2 spaces forwards
