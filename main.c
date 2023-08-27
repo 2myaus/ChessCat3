@@ -961,19 +961,19 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                 }
             }
         }
-        /*
+
         if(position->game_rules.sideways_pawns){
             chesscat_Square left_square = {.row = square.row - col_dist, .col = square.col - row_dist};
             chesscat_Square right_square = {.row = square.row + col_dist, .col = square.col + row_dist};
 
-            if(chesscat_square_in_bounds(position, left_square)){
+            if(chesscat_square_in_bounds(position, left_square) && _chesscat_color_can_capture_piece(position, piece.color, chesscat_get_piece_at_square(position, left_square))){
                 if(moves_buf != NULL){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = left_square;
                 }
                 num_moves++;
             }
-            if(chesscat_square_in_bounds(position, right_square)){
+            if(chesscat_square_in_bounds(position, right_square) && _chesscat_color_can_capture_piece(position, piece.color, chesscat_get_piece_at_square(position, right_square))){
                 if(moves_buf != NULL){
                     moves_buf[num_moves].from = square;
                     moves_buf[num_moves].to = right_square;
@@ -981,7 +981,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                 num_moves++;
             }
         }
-        */
+
     }
 
     return num_moves;
