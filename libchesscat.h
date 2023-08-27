@@ -78,7 +78,7 @@ typedef struct{
     //bool torpedo_pawns; //Pawns can always move 2 spaces forwards
     //uint8_t promotion_rank;
     //uint8_t check_lives; //For n+ Check modes. Set to 0 to disable
-    //bool capture_all; //Capture all pieces to win
+    bool capture_all; //Capture all pieces to win
     bool allow_castle;
     bool allow_passant;
     //TODO: Pawn promotion options

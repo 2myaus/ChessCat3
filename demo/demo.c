@@ -81,11 +81,7 @@ int main(/*int argc, char* argv[]*/)
     printf("chesscat_Move size: %lu\n", sizeof(chesscat_Move));
 
     chesscat_Game g;
-    int result = chesscat_set_game_to_FEN(&g, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-    if(result != 0){
-        printf("Parse error! %d\n", result);
-    }
-    //chesscat_set_default_game(&g);
+    chesscat_set_default_game(&g);
 
     PrintPosition(&g);
 

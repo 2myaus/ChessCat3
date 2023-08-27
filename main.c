@@ -60,7 +60,7 @@ bool _chesscat_square_on_promotion_rank(chesscat_Position *position, chesscat_Sq
 
 bool _chesscat_position_ignores_checks(chesscat_Position *position)
 {
-    if (position->game_rules.ignore_checks)
+    if (position->game_rules.ignore_checks || position->game_rules.capture_all)
     {
         return true;
     }
@@ -141,6 +141,23 @@ bool _chesscat_has_royal(chesscat_Position *position, chesscat_EColor color){
         }
     }
     return false;
+}
+
+uint16_t _chesscat_count_pieces(chesscat_Position *position, chesscat_EColor color){
+    uint16_t count = 0;
+    for (uint16_t row = 0; row < position->game_rules.board_height; row++)
+    {
+        for (uint16_t col = 0; col < position->game_rules.board_width; col++)
+        {
+            chesscat_Square square = {.row = row, .col = col};
+            chesscat_Piece piece = chesscat_get_piece_at_square(position, square);
+            if (piece.color == color && piece.type != Empty)
+            {
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 chesscat_Square _chesscat_find_lower_rook(chesscat_Position *position, chesscat_EColor color)
@@ -248,11 +265,14 @@ void _chesscat_set_next_to_play(chesscat_Position *position)
         break;
     }
     uint8_t i = 0;
-    while (position->color_data[position->to_move].is_in_game == false || !_chesscat_has_royal(position, position->to_move))
+    while (
+        (
+            !(position->color_data[position->to_move].is_in_game) || (
+                !_chesscat_has_royal(position, position->to_move) && !(position->game_rules.capture_all)
+            )
+        ) &&
+        i < CHESSCAT_NUM_COLORS)
     {
-        if(i >= CHESSCAT_NUM_COLORS){
-            break;
-        }
         i++;
         switch (position->to_move)
         {
@@ -1300,15 +1320,31 @@ chesscat_EPositionState chesscat_get_current_state(chesscat_Position *position){
 
     bool noLegalMoves = (num_legal_moves == 0);
 
-    if(noLegalMoves && isCheck){
-        return Checkmated;
+    if(_chesscat_position_ignores_checks(position)){
+        if(position->game_rules.capture_all){
+            if(_chesscat_count_pieces(position, position->to_move) == 0){
+                return Checkmated;
+            }
+            else if(noLegalMoves){
+                return Stalemated;
+            }
+        }
+        else if(!_chesscat_has_royal(position, position->to_move)){
+            return Checkmated;
+        }
     }
-    if(noLegalMoves){
-        return Stalemated;
+    else{
+        if(noLegalMoves && isCheck){
+            return Checkmated;
+        }
+        if(noLegalMoves){
+            return Stalemated;
+        }
+        if(isCheck){
+            return Checked;
+        }
     }
-    if(isCheck){
-        return Checked;
-    }
+    //TODO: Add lack of material draws
     return Normal;
 }
 
@@ -1720,6 +1756,7 @@ void _chesscat_set_default_rules(chesscat_GameRules *rules)
     rules->board_height = 8;
     rules->board_width = 8;
     rules->ignore_checks = false;
+    rules->capture_all = false;
 }
 
 void chesscat_set_default_game(chesscat_Game *game)
