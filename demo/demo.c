@@ -85,6 +85,7 @@ int main(/*int argc, char* argv[]*/)
     if(result != 0){
         printf("Parse error! %d\n", result);
     }
+    //chesscat_set_default_game(&g);
 
     PrintPosition(&g);
 

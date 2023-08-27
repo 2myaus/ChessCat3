@@ -127,6 +127,22 @@ chesscat_Square _chesscat_find_king(chesscat_Position *position, chesscat_EColor
     return none;
 }
 
+bool _chesscat_has_royal(chesscat_Position *position, chesscat_EColor color){
+    for (uint16_t row = 0; row < position->game_rules.board_height; row++)
+    {
+        for (uint16_t col = 0; col < position->game_rules.board_width; col++)
+        {
+            chesscat_Square square = {.row = row, .col = col};
+            chesscat_Piece piece = chesscat_get_piece_at_square(position, square);
+            if (piece.is_royal && piece.color == color)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 chesscat_Square _chesscat_find_lower_rook(chesscat_Position *position, chesscat_EColor color)
 { // Finds lower-coordinate rook on the specified color's king's rank
     chesscat_Square none = {.row = -1, .col = -1};
@@ -231,8 +247,13 @@ void _chesscat_set_next_to_play(chesscat_Position *position)
         position->to_move = White;
         break;
     }
-    while (position->color_data[position->to_move].is_in_game == false || !chesscat_is_valid_square(_chesscat_find_king(position, position->to_move)))
+    uint8_t i = 0;
+    while (position->color_data[position->to_move].is_in_game == false || !_chesscat_has_royal(position, position->to_move))
     {
+        if(i >= CHESSCAT_NUM_COLORS){
+            break;
+        }
+        i++;
         switch (position->to_move)
         {
         case White:
@@ -1796,6 +1817,9 @@ uint8_t chesscat_set_game_to_FEN(chesscat_Game *game, char* FEN){
 
         chesscat_Piece charpiece = chesscat_get_piece_from_char(currentchar);
         if(charpiece.type != Empty){
+            if(charpiece.type == King){
+                charpiece.is_royal = true;
+            }
             flipped_board[rowpos][colpos] = charpiece;
             colpos++;
             continue;
