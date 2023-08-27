@@ -916,6 +916,22 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     }
                 }
             }
+            else if(position->game_rules.kangaroo_pawns){
+                chesscat_Square double_advance_square = {.row = square.row + row_dist * 2, .col = square.col + col_dist * 2};
+                if (chesscat_square_in_bounds(position, double_advance_square))
+                {
+                    chesscat_Piece double_advance_piece = chesscat_get_piece_at_square(position, double_advance_square);
+                    if (double_advance_piece.type == Empty)
+                    {
+                        if (moves_buf != NULL)
+                        {
+                            moves_buf[num_moves].from = square;
+                            moves_buf[num_moves].to = double_advance_square;
+                        }
+                        num_moves++;
+                    }
+                }
+            }
             if (chesscat_square_in_bounds(position, take_left_square))
             {
                 chesscat_Piece take_left_piece = chesscat_get_piece_at_square(position, take_left_square);
@@ -928,7 +944,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     }
                     num_moves++;
                 }
-                if (_chesscat_same_squares(take_left_square, position->passantable_square))
+                if (_chesscat_same_squares(take_left_square, position->passantable_square) && take_left_piece.type == Empty)
                 {
                     if (moves_buf != NULL)
                     {
@@ -950,7 +966,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     }
                     num_moves++;
                 }
-                if (_chesscat_same_squares(take_right_square, position->passantable_square))
+                if (_chesscat_same_squares(take_right_square, position->passantable_square) && take_right_piece.type == Empty)
                 {
                     if (moves_buf != NULL)
                     {
@@ -1101,7 +1117,7 @@ void chesscat_move_pieces(chesscat_Position *position, chesscat_Move move)
     }
     if (moving.type == Pawn)
     {
-        if (_chesscat_same_squares(move.to, position->passantable_square))
+        if (_chesscat_same_squares(move.to, position->passantable_square) && move.from.col != move.to.col && move.from.row != move.to.row)
         {
             chesscat_set_piece_at_square(position, position->passant_target_square, empty);
         }
@@ -1768,6 +1784,9 @@ void _chesscat_set_default_rules(chesscat_GameRules *rules)
     rules->board_width = 8;
     rules->ignore_checks = false;
     rules->capture_all = false;
+    rules->capture_own = false;
+    rules->sideways_pawns = false;
+    rules->kangaroo_pawns = false;
 }
 
 void chesscat_set_default_game(chesscat_Game *game)
