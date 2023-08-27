@@ -76,7 +76,7 @@ typedef struct{
     bool sideways_pawns; //Pawns can move sideways
     bool kangaroo_pawns; //Pawns can jump over the piece in front of them
     //bool backwards_pawns; //Pawns can move backwards
-    //bool torpedo_pawns; //Pawns can always move 2 spaces forwards
+    bool torpedo_pawns; //Pawns can always move 2 spaces forwards
     //uint8_t promotion_rank;
     //uint8_t check_lives; //For n+ Check modes. Set to 0 to disable
     bool capture_all; //Capture all pieces to win

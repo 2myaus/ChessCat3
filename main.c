@@ -894,7 +894,7 @@ uint16_t chesscat_get_possible_moves_from(chesscat_Position *position, chesscat_
                     moves_buf[num_moves].to = advance_square;
                 }
                 num_moves++;
-                if (/*position->game_rules.torpedo_pawns ||*/
+                if (position->game_rules.torpedo_pawns ||
                     (piece.color == White && square.row <= 1) ||
                     (piece.color == Black && square.row >= position->game_rules.board_height - 2) ||
                     (piece.color == Green && square.col >= 1) ||
